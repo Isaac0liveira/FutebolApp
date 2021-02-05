@@ -8,6 +8,7 @@ public class Campeonato implements Serializable {
     private String slug;
     private String nome_popular;
     private Edicao edicao_atual;
+    private String logo;
     private boolean plano;
 
 
@@ -57,6 +58,14 @@ public class Campeonato implements Serializable {
         public void setSlug(String slug) {
             this.slug = slug;
         }
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 
     public Edicao getEdicao_atual() {

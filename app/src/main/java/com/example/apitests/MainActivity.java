@@ -4,14 +4,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -24,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     Api api;
     ArrayAdapter adapter;
-    List<Campeonato> campeonatos;
+    List<Campeonato> campeonatos = new ArrayList<>();
     ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,19 +40,9 @@ public class MainActivity extends AppCompatActivity {
 
         api = retrofit.create(Api.class);
 
-        adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1);
-        getCampeonatos();
-
-        /*for(int pos = 0; pos < campeonatos.size(); pos++){
-            if(!campeonatos.get(pos).isPlano()){
-                Log.d("Camp", campeonatos.get(pos).getNome());
-                View item = (View) adapter.getView(pos, null, listView);
-                item.setAlpha(0.1f);
-            }
-        }
-        */
-
         listView = findViewById(R.id.listView);
+        getCampeonatos();
+        CampeonatoAdapter adapter = new CampeonatoAdapter(this, campeonatos);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener((parent, view, position, id) -> {
             if(campeonatos.get(position).isPlano()){
@@ -58,8 +51,13 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "NÃO incluído no Plano", Toast.LENGTH_SHORT).show();
             }
         });
+        Toast.makeText(getApplicationContext(), "Carregando Campeonatos...", Toast.LENGTH_SHORT).show();
+        new Handler().postDelayed(() -> {
+            listView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
+            listView.setVisibility(View.VISIBLE);
+            listView.invalidateViews();
+        }, 3000);
     }
-
 
     public void getCampeonatos(){
         Call<List<Campeonato>> call = api.getCampeonatos();
@@ -69,11 +67,13 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<List<Campeonato>> call, Response<List<Campeonato>> response) {
 
                 List<Campeonato> campeonatoes = response.body();
-                campeonatos = campeonatoes;
+                campeonatos.addAll(campeonatoes);
                 Log.d("response", response.body().toString());
+                int pos = 0;
+                listView.setVisibility(View.INVISIBLE);
                 for(Campeonato c: campeonatoes){
-                    adapter.add(c);
-                    getCampeonato(String.valueOf(c.getCampeonato_id()));
+                    getCampeonato(String.valueOf(c.getCampeonato_id()), pos);
+                    pos++;
                 }
             }
 
@@ -82,10 +82,9 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
-    public void getCampeonato(String id){
+    public void getCampeonato(String id, int pos){
         Call<Campeonato> call = api.getCampeonato(id);
 
         call.enqueue(new Callback<Campeonato>() {

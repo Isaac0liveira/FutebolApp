@@ -10,12 +10,12 @@ import retrofit2.http.Path;
 public interface Api {
 
     String BASE_URL = "https://api.api-futebol.com.br/v1/";
-
-    @Headers({"Authorization: Bearer live_77101c44e30c908b394ae9198e49fe"})
+    //live_32731f223b23e3d6d70558a3e47a6f
+    @Headers({"Authorization: Bearer live_32731f223b23e3d6d70558a3e47a6f"})
     @GET("campeonatos")
     Call<List<Campeonato>> getCampeonatos();
 
-    @Headers({"Authorization: Bearer live_77101c44e30c908b394ae9198e49fe"})
+    @Headers({"Authorization: Bearer live_32731f223b23e3d6d70558a3e47a6f"})
     @GET("campeonatos/{id}")
     Call<Campeonato> getCampeonato(@Path("id") String id);
 
