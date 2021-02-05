@@ -3,13 +3,12 @@ package com.example.apitests;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -23,7 +22,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
+public class CampeonatoActivity extends AppCompatActivity {
 
     Api api;
     ArrayAdapter adapter;
@@ -47,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener((parent, view, position, id) -> {
             if(campeonatos.get(position).isPlano()){
                 Toast.makeText(getApplicationContext(), "Incluído no Plano", Toast.LENGTH_SHORT).show();
+                if(campeonatos.get(position).getTipo().equals("Pontos Corridos")){
+                    Intent intent = new Intent(this, TabelaActivity.class);
+                    intent.putExtra("id",String.valueOf(campeonatos.get(position).getCampeonato_id() + "/fases/" + campeonatos.get(position).getFase_atual().getFase_id()));
+                    startActivity(intent);
+                }
             }else{
                 Toast.makeText(getApplicationContext(), "NÃO incluído no Plano", Toast.LENGTH_SHORT).show();
             }
@@ -65,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<Campeonato>>() {
             @Override
             public void onResponse(Call<List<Campeonato>> call, Response<List<Campeonato>> response) {
-
                 List<Campeonato> campeonatoes = response.body();
                 campeonatos.addAll(campeonatoes);
                 Log.d("response", response.body().toString());

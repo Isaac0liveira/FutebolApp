@@ -8,7 +8,9 @@ public class Campeonato implements Serializable {
     private String slug;
     private String nome_popular;
     private Edicao edicao_atual;
+    private FaseAtual fase_atual;
     private String logo;
+    private String tipo;
     private boolean plano;
 
 
@@ -58,6 +60,43 @@ public class Campeonato implements Serializable {
         public void setSlug(String slug) {
             this.slug = slug;
         }
+    }
+
+    public class FaseAtual {
+        private String fase_id;
+        private String nome;
+
+        public String getFase_id() {
+            return fase_id;
+        }
+
+        public void setFase_id(String fase_id) {
+            this.fase_id = fase_id;
+        }
+
+        public String getNome() {
+            return nome;
+        }
+
+        public void setNome(String nome) {
+            this.nome = nome;
+        }
+    }
+
+    public FaseAtual getFase_atual() {
+        return fase_atual;
+    }
+
+    public void setFase_atual(FaseAtual fase_atual) {
+        this.fase_atual = fase_atual;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
 
     public String getLogo() {

@@ -19,5 +19,9 @@ public interface Api {
     @GET("campeonatos/{id}")
     Call<Campeonato> getCampeonato(@Path("id") String id);
 
+    @Headers({"Authorization: Bearer live_32731f223b23e3d6d70558a3e47a6f"})
+    @GET("campeonatos/{campeonato}/fases/{fase}")
+    Call<Fase> getFase(@Path("campeonato") String campeonato, @Path("fase") String fase);
+
 
 }

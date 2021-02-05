@@ -82,11 +82,19 @@ public class CampeonatoAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         @SuppressLint("ViewHolder") View view = activity.getLayoutInflater().inflate(R.layout.campeonato_item, parent, false);
-        TextView textView = view.findViewById(R.id.textView);
+        TextView nome = view.findViewById(R.id.textView);
+        TextView tipo = view.findViewById(R.id.view_tipo);
+        TextView fase = view.findViewById(R.id.view_fase);
         Campeonato campeonato = campeonatos.get(position);
-        textView.setText(campeonato.getNome());
+        nome.setText(campeonato.getNome());
+        tipo.setText(campeonato.getTipo());
+        fase.setText(campeonato.getFase_atual().getNome());
         if(!campeonato.isPlano()){
-            textView.setAlpha(0.1f);
+            nome.setAlpha(0.1f);
+            tipo.setAlpha(0.1f);
+            fase.setAlpha(0.1f);
+            view.findViewById(R.id.textView3).setAlpha(0.1f);
+            view.findViewById(R.id.textView5).setAlpha(0.1f);
         }
         new DownloadImageTask(view.findViewById(R.id.imageView))
                 .execute(campeonato.getLogo());
