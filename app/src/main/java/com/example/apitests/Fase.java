@@ -1,13 +1,15 @@
 package com.example.apitests;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Fase implements Serializable {
+    private String fase_id;
+    private List<Tabela> tabela;
 
-    private Tabela tabela;
-
-    class Tabela implements Serializable {
+    public class Tabela {
         private int posicao;
+        private Time time;
         private int pontos;
         private int jogos;
         private int vitorias;
@@ -19,6 +21,26 @@ public class Fase implements Serializable {
         private float aproveitamento;
         private int variacao_posicao;
         private String[] ultimos_jogos;
+
+        public class Time{
+            private String nome_popular;
+
+            public String getNome_popular() {
+                return nome_popular;
+            }
+
+            public void setNome_popular(String nome_popular) {
+                this.nome_popular = nome_popular;
+            }
+        }
+
+        public Time getTime() {
+            return time;
+        }
+
+        public void setTime(Time time) {
+            this.time = time;
+        }
 
         public int getPosicao() {
             return posicao;
@@ -117,11 +139,19 @@ public class Fase implements Serializable {
         }
     }
 
-    public Tabela getTabela() {
+    public String getFase_id() {
+        return fase_id;
+    }
+
+    public void setFase_id(String fase_id) {
+        this.fase_id = fase_id;
+    }
+
+    public List<Tabela> getTabela() {
         return tabela;
     }
 
-    public void setTabela(Tabela tabela) {
+    public void setTabela(List<Tabela> tabela) {
         this.tabela = tabela;
     }
 }

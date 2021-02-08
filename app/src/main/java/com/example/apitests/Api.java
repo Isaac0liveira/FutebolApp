@@ -1,5 +1,6 @@
 package com.example.apitests;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -11,17 +12,21 @@ public interface Api {
 
     String BASE_URL = "https://api.api-futebol.com.br/v1/";
     //live_32731f223b23e3d6d70558a3e47a6f
-    @Headers({"Authorization: Bearer live_32731f223b23e3d6d70558a3e47a6f"})
+    @Headers({"Authorization: Bearer live_3e8f083a45cf315af87c941f991acc"})
     @GET("campeonatos")
     Call<List<Campeonato>> getCampeonatos();
 
-    @Headers({"Authorization: Bearer live_32731f223b23e3d6d70558a3e47a6f"})
+    @Headers({"Authorization: Bearer live_3e8f083a45cf315af87c941f991acc"})
     @GET("campeonatos/{id}")
     Call<Campeonato> getCampeonato(@Path("id") String id);
 
-    @Headers({"Authorization: Bearer live_32731f223b23e3d6d70558a3e47a6f"})
+    @Headers({"Authorization: Bearer live_3e8f083a45cf315af87c941f991acc"})
     @GET("campeonatos/{campeonato}/fases/{fase}")
     Call<Fase> getFase(@Path("campeonato") String campeonato, @Path("fase") String fase);
+
+    @Headers({"Authorization: Bearer live_3e8f083a45cf315af87c941f991acc"})
+    @GET("campeonatos/{campeonato}/rodadas/{rodada}")
+    Call<Fase> getRodada(@Path("campeonato") String campeonato, @Path("rodada") String rodada);
 
 
 }

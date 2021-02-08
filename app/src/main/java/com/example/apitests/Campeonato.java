@@ -9,9 +9,22 @@ public class Campeonato implements Serializable {
     private String nome_popular;
     private Edicao edicao_atual;
     private FaseAtual fase_atual;
+    private Rodada rodada_atual;
     private String logo;
     private String tipo;
     private boolean plano;
+
+    public class Rodada{
+        private int rodada;
+
+        public int getRodada() {
+            return rodada;
+        }
+
+        public void setRodada(int rodada) {
+            this.rodada = rodada;
+        }
+    }
 
 
     public class Edicao {
@@ -81,6 +94,14 @@ public class Campeonato implements Serializable {
         public void setNome(String nome) {
             this.nome = nome;
         }
+    }
+
+    public Rodada getRodada_atual() {
+        return rodada_atual;
+    }
+
+    public void setRodada_atual(Rodada rodada_atual) {
+        this.rodada_atual = rodada_atual;
     }
 
     public FaseAtual getFase_atual() {

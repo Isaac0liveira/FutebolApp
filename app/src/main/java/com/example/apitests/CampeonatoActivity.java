@@ -48,7 +48,10 @@ public class CampeonatoActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Incluído no Plano", Toast.LENGTH_SHORT).show();
                 if(campeonatos.get(position).getTipo().equals("Pontos Corridos")){
                     Intent intent = new Intent(this, TabelaActivity.class);
-                    intent.putExtra("id",String.valueOf(campeonatos.get(position).getCampeonato_id() + "/fases/" + campeonatos.get(position).getFase_atual().getFase_id()));
+                    intent.putExtra("nome", campeonatos.get(position).getNome());
+                    intent.putExtra("rodada", String.valueOf(campeonatos.get(position).getRodada_atual().getRodada()));
+                    intent.putExtra("id", String.valueOf(campeonatos.get(position).getCampeonato_id()));
+                    intent.putExtra("fase", String.valueOf(campeonatos.get(position).getFase_atual().getFase_id()));
                     startActivity(intent);
                 }
             }else{
