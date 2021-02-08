@@ -47,7 +47,7 @@ public class TabelaActivity extends AppCompatActivity {
         rodadaTxt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                api.getRodada(id, rodada);
             }
         });
         TabelaAdapter adapter = new TabelaAdapter(this, tabela);
