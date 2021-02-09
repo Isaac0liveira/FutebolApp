@@ -7,19 +7,18 @@
 
     <TextView
         android:id="@+id/recentes"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="318dp"
+        android:layout_marginStart="330dp"
         android:layout_marginTop="8dp"
         android:text="Recentes"
         android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/aproveitamento"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="290dp"
         android:layout_marginTop="8dp"
@@ -30,7 +29,7 @@
 
     <TextView
         android:id="@+id/golPro"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="216dp"
         android:layout_marginTop="8dp"
@@ -41,7 +40,7 @@
 
     <TextView
         android:id="@+id/golContra"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="240dp"
         android:layout_marginTop="8dp"
@@ -52,7 +51,7 @@
 
     <TextView
         android:id="@+id/saldoGols"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="264dp"
         android:layout_marginTop="8dp"
@@ -63,7 +62,7 @@
 
     <TextView
         android:id="@+id/derrotas"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="190dp"
         android:layout_marginTop="8dp"
@@ -74,7 +73,7 @@
 
     <TextView
         android:id="@+id/empates"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="170dp"
         android:layout_marginTop="8dp"
@@ -96,7 +95,7 @@
 
     <TextView
         android:id="@+id/jogos"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="130dp"
         android:layout_marginTop="8dp"
@@ -107,7 +106,7 @@
 
     <TextView
         android:id="@+id/pts"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="102dp"
         android:layout_marginTop="8dp"
@@ -118,7 +117,7 @@
 
     <TextView
         android:id="@+id/time"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="8dp"
@@ -129,7 +128,7 @@
 
     <TextView
         android:id="@+id/pos"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
         android:layout_marginTop="8dp"

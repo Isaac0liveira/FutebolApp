@@ -7,6 +7,8 @@ public class Fase implements Serializable {
     private String fase_id;
     private List<Tabela> tabela;
     private List<Chave> chaves;
+    private Fase fase_anterior;
+    private Fase proxima_fase;
 
     public class Chave{
         private String nome;
@@ -192,5 +194,21 @@ public class Fase implements Serializable {
 
     public void setChaves(List<Chave> chaves) {
         this.chaves = chaves;
+    }
+
+    public Fase getFase_anterior() {
+        return fase_anterior;
+    }
+
+    public void setFase_anterior(Fase fase_anterior) {
+        this.fase_anterior = fase_anterior;
+    }
+
+    public Fase getProxima_fase() {
+        return proxima_fase;
+    }
+
+    public void setProxima_fase(Fase proxima_fase) {
+        this.proxima_fase = proxima_fase;
     }
 }

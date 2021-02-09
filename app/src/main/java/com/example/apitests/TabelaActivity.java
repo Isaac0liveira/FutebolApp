@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.GridView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,7 +48,7 @@ public class TabelaActivity extends AppCompatActivity {
         fase = (String) intent.getSerializableExtra("fase");
 
 
-        GridView gridView = findViewById(R.id.gridView);
+        ListView gridView = findViewById(R.id.gridView);
         TextView rodadaTxt = findViewById(R.id.rodadaTxt);
         rodadaTxt.setOnClickListener(v -> {
            if(rodada != null){

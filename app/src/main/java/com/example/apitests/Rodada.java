@@ -6,6 +6,8 @@ public class Rodada {
 
     private String nome;
     private int rodada;
+    private Rodada rodada_anterior;
+    private Rodada proxima_rodada;
     private List<Partida> partidas;
 
     public class Partida{
@@ -143,5 +145,21 @@ public class Rodada {
 
     public void setPartidas(List<Partida> partidas) {
         this.partidas = partidas;
+    }
+
+    public Rodada getRodada_anterior() {
+        return rodada_anterior;
+    }
+
+    public void setRodada_anterior(Rodada rodada_anterior) {
+        this.rodada_anterior = rodada_anterior;
+    }
+
+    public Rodada getProxima_rodada() {
+        return proxima_rodada;
+    }
+
+    public void setProxima_rodada(Rodada proxima_rodada) {
+        this.proxima_rodada = proxima_rodada;
     }
 }

@@ -80,7 +80,7 @@ public class FaseAdapter extends BaseAdapter {
             txtStatus.setTextColor(Color.BLUE);
         }else{
             txtStatus.setText("Agendado");
-            txtStatus.setTextColor(Color.GREEN);
+            txtStatus.setTextColor(Color.green(10));
         }
         txtData.setText(partidaIda.getData_realizacao());
         txtHora.setText(partidaIda.getHora_realizacao());

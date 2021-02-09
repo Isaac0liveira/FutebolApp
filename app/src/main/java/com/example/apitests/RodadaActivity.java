@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +25,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RodadaActivity extends AppCompatActivity {
 
     List<Rodada.Partida> partidas = new ArrayList<Rodada.Partida>();
+    Api api;
+    Retrofit retrofit;
+    ListView listRodadas;
+    RodadaAdapter adapter;
+    String campeonato;
+    String rodada;
+    String nome;
+    TextView rodadaAtual;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -31,30 +40,71 @@ public class RodadaActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rodada);
 
-        Retrofit retrofit = new Retrofit.Builder().baseUrl(Api.BASE_URL)
+        retrofit = new Retrofit.Builder().baseUrl(Api.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
-        Api api = retrofit.create(Api.class);
+        api = retrofit.create(Api.class);
 
-        ListView listRodadas = findViewById(R.id.listRodadas);
-        RodadaAdapter adapter = new RodadaAdapter(this, partidas);
+        listRodadas = findViewById(R.id.listRodadas);
+        adapter = new RodadaAdapter(this, partidas);
         listRodadas.setAdapter(adapter);
 
         Intent intent = getIntent();
-        String campeonato = (String) intent.getSerializableExtra("campeonato");
-        String rodada = (String) intent.getSerializableExtra("rodada");
-        String nome = (String) intent.getSerializableExtra("nome");
+        campeonato = (String) intent.getSerializableExtra("campeonato");
+        rodada = (String) intent.getSerializableExtra("rodada");
+        nome = (String) intent.getSerializableExtra("nome");
 
         this.setTitle(nome);
-        getSupportActionBar().setSubtitle("Rodada " + rodada);
 
-        TextView rodadaAtual = findViewById(R.id.rodada_atual);
+        rodadaAtual = findViewById(R.id.rodada_atual);
         rodadaAtual.setText("Rodada " + rodada);
 
-        Call<Rodada> callRodada = api.getRodada(campeonato, rodada);
+        call(campeonato, rodada);
+    }
+
+    public void showMessage(String message){
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    public void call(String novoCampeonato, String novaRodada){
+        getSupportActionBar().setSubtitle("Rodada " + novaRodada);
+        rodadaAtual = findViewById(R.id.rodada_atual);
+        rodadaAtual.setText("Rodada " + novaRodada);
+        Call<Rodada> callRodada = api.getRodada(novoCampeonato, novaRodada);
         callRodada.enqueue(new Callback<Rodada>() {
             @Override
             public void onResponse(Call<Rodada> call, Response<Rodada> response) {
+                partidas.clear();
                 if(response.code() == 200) {
+                    Rodada proxima = null;
+                    Rodada anterior = null;
+                    if(response.body().getProxima_rodada() != null){
+                        proxima = response.body().getProxima_rodada();
+                    }
+                    if(response.body().getRodada_anterior() != null) {
+                        anterior = response.body().getRodada_anterior();
+                    }
+                    if(proxima != null){
+                        TextView txtProxima = findViewById(R.id.txtProx);
+                        txtProxima.setVisibility(View.VISIBLE);
+                        Rodada finalProxima = proxima;
+                        txtProxima.setOnClickListener(v -> {
+                                call(campeonato, String.valueOf(finalProxima.getRodada()));
+                        });
+                    }else{
+                        TextView txtProxima = findViewById(R.id.txtProx);
+                        txtProxima.setVisibility(View.GONE);
+                    }
+                    if(anterior != null){
+                        TextView txtAnterior = findViewById(R.id.txtAnt);
+                        txtAnterior.setVisibility(View.VISIBLE);
+                        Rodada finalAnterior = anterior;
+                        txtAnterior.setOnClickListener(v -> {
+                            call(campeonato, String.valueOf(finalAnterior.getRodada()));
+                        });
+                    }else{
+                        TextView txtAnterior = findViewById(R.id.txtAnt);
+                        txtAnterior.setVisibility(View.GONE);
+                    }
                     partidas.addAll(response.body().getPartidas());
                     listRodadas.invalidateViews();
                 }else{
@@ -67,9 +117,5 @@ public class RodadaActivity extends AppCompatActivity {
                 Log.d("Errors", t.getMessage());
             }
         });
-    }
-
-    public void showMessage(String message){
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }
