@@ -77,6 +77,7 @@ public class Campeonato implements Serializable {
 
     public class FaseAtual {
         private String fase_id;
+        private String tipo;
         private String nome;
 
         public String getFase_id() {
@@ -93,6 +94,14 @@ public class Campeonato implements Serializable {
 
         public void setNome(String nome) {
             this.nome = nome;
+        }
+
+        public String getTipo() {
+            return tipo;
+        }
+
+        public void setTipo(String tipo) {
+            this.tipo = tipo;
         }
     }
 

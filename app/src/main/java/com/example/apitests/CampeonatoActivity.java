@@ -45,17 +45,22 @@ public class CampeonatoActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
         listView.setOnItemClickListener((parent, view, position, id) -> {
             if(campeonatos.get(position).isPlano()){
-                Toast.makeText(getApplicationContext(), "Incluído no Plano", Toast.LENGTH_SHORT).show();
-                if(campeonatos.get(position).getTipo().equals("Pontos Corridos")){
+                if(campeonatos.get(position).getFase_atual().getTipo().equals("pontos-corridos")){
                     Intent intent = new Intent(this, TabelaActivity.class);
                     intent.putExtra("nome", campeonatos.get(position).getNome());
                     intent.putExtra("rodada", String.valueOf(campeonatos.get(position).getRodada_atual().getRodada()));
                     intent.putExtra("id", String.valueOf(campeonatos.get(position).getCampeonato_id()));
                     intent.putExtra("fase", String.valueOf(campeonatos.get(position).getFase_atual().getFase_id()));
                     startActivity(intent);
+                }else{
+                    Intent intent = new Intent(this, FaseActivity.class);
+                    intent.putExtra("nome", campeonatos.get(position).getNome());
+                    intent.putExtra("campeonato", String.valueOf(campeonatos.get(position).getCampeonato_id()));
+                    intent.putExtra("fase", String.valueOf(campeonatos.get(position).getFase_atual().getFase_id()));
+                    startActivity(intent);
                 }
             }else{
-                Toast.makeText(getApplicationContext(), "NÃO incluído no Plano", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Campeonato Não Disponível", Toast.LENGTH_SHORT).show();
             }
         });
         Toast.makeText(getApplicationContext(), "Carregando Campeonatos...", Toast.LENGTH_SHORT).show();
@@ -72,14 +77,21 @@ public class CampeonatoActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<Campeonato>>() {
             @Override
             public void onResponse(Call<List<Campeonato>> call, Response<List<Campeonato>> response) {
-                List<Campeonato> campeonatoes = response.body();
-                campeonatos.addAll(campeonatoes);
-                Log.d("response", response.body().toString());
-                int pos = 0;
-                listView.setVisibility(View.INVISIBLE);
-                for(Campeonato c: campeonatoes){
-                    getCampeonato(String.valueOf(c.getCampeonato_id()), pos);
-                    pos++;
+                Log.d("Responses", call.request().toString());
+                Log.d("Responses", response.message());
+                Log.d("Responses", String.valueOf(response.code()));
+                if(response.code() == 200) {
+                    List<Campeonato> campeonatoes = response.body();
+                    campeonatos.addAll(campeonatoes);
+                    Log.d("response", response.body().toString());
+                    int pos = 0;
+                    listView.setVisibility(View.INVISIBLE);
+                    for (Campeonato c : campeonatoes) {
+                        getCampeonato(String.valueOf(c.getCampeonato_id()), pos);
+                        pos++;
+                    }
+                }else{
+                    showMessage("Não foi possível obter a lista de campeonatos, retorne mais tarde");
                 }
             }
 
@@ -96,7 +108,7 @@ public class CampeonatoActivity extends AppCompatActivity {
         call.enqueue(new Callback<Campeonato>() {
             @Override
             public void onResponse(Call<Campeonato> call, Response<Campeonato> response) {
-                if(response.code() != 401) {
+                if(response.code() == 200) {
                     Campeonato compare = response.body();
                     Log.d("Retorno", response.toString());
                     for (Campeonato c : campeonatos) {
@@ -120,6 +132,10 @@ public class CampeonatoActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void showMessage(String message){
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
 }

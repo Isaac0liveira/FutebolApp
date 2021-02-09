@@ -6,6 +6,37 @@ import java.util.List;
 public class Fase implements Serializable {
     private String fase_id;
     private List<Tabela> tabela;
+    private List<Chave> chaves;
+
+    public class Chave{
+        private String nome;
+        private Rodada.Partida partida_ida;
+        private Rodada.Partida partida_volta;
+
+        public String getNome() {
+            return nome;
+        }
+
+        public void setNome(String nome) {
+            this.nome = nome;
+        }
+
+        public Rodada.Partida getPartida_ida() {
+            return partida_ida;
+        }
+
+        public void setPartida_ida(Rodada.Partida partida_ida) {
+            this.partida_ida = partida_ida;
+        }
+
+        public Rodada.Partida getPartida_volta() {
+            return partida_volta;
+        }
+
+        public void setPartida_volta(Rodada.Partida partida_volta) {
+            this.partida_volta = partida_volta;
+        }
+    }
 
     public class Tabela {
         private int posicao;
@@ -153,5 +184,13 @@ public class Fase implements Serializable {
 
     public void setTabela(List<Tabela> tabela) {
         this.tabela = tabela;
+    }
+
+    public List<Chave> getChaves() {
+        return chaves;
+    }
+
+    public void setChaves(List<Chave> chaves) {
+        this.chaves = chaves;
     }
 }

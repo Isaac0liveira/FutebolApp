@@ -12,21 +12,21 @@ public interface Api {
 
     String BASE_URL = "https://api.api-futebol.com.br/v1/";
     //live_32731f223b23e3d6d70558a3e47a6f
-    @Headers({"Authorization: Bearer live_3e8f083a45cf315af87c941f991acc"})
+    @Headers({"Authorization: Bearer live_ffad403b71dbcde5a995282d9f33f2"})
     @GET("campeonatos")
     Call<List<Campeonato>> getCampeonatos();
 
-    @Headers({"Authorization: Bearer live_3e8f083a45cf315af87c941f991acc"})
+    @Headers({"Authorization: Bearer live_ffad403b71dbcde5a995282d9f33f2"})
     @GET("campeonatos/{id}")
     Call<Campeonato> getCampeonato(@Path("id") String id);
 
-    @Headers({"Authorization: Bearer live_3e8f083a45cf315af87c941f991acc"})
+    @Headers({"Authorization: Bearer live_ffad403b71dbcde5a995282d9f33f2"})
     @GET("campeonatos/{campeonato}/fases/{fase}")
     Call<Fase> getFase(@Path("campeonato") String campeonato, @Path("fase") String fase);
 
-    @Headers({"Authorization: Bearer live_3e8f083a45cf315af87c941f991acc"})
+    @Headers({"Authorization: Bearer live_ffad403b71dbcde5a995282d9f33f2"})
     @GET("campeonatos/{campeonato}/rodadas/{rodada}")
-    Call<Fase> getRodada(@Path("campeonato") String campeonato, @Path("rodada") String rodada);
+    Call<Rodada> getRodada(@Path("campeonato") String campeonato, @Path("rodada") String rodada);
 
 
 }

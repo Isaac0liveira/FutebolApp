@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.tabs.TabLayout;
 
@@ -25,6 +26,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class TabelaActivity extends AppCompatActivity {
 
     List<Fase.Tabela> tabela = new ArrayList<>();
+    String nome;
+    String rodada;
+    String id;
+    String fase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,19 +41,18 @@ public class TabelaActivity extends AppCompatActivity {
 
 
         Intent intent = getIntent();
-        String nome = (String) intent.getSerializableExtra("nome");
-        String rodada = (String) intent.getSerializableExtra("rodada");
-        String id = (String) intent.getSerializableExtra("id");
-        String fase = (String) intent.getSerializableExtra("fase");
+        nome = (String) intent.getSerializableExtra("nome");
+        rodada = (String) intent.getSerializableExtra("rodada");
+        id = (String) intent.getSerializableExtra("id");
+        fase = (String) intent.getSerializableExtra("fase");
 
 
         GridView gridView = findViewById(R.id.gridView);
         TextView rodadaTxt = findViewById(R.id.rodadaTxt);
-        rodadaTxt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                api.getRodada(id, rodada);
-            }
+        rodadaTxt.setOnClickListener(v -> {
+           if(rodada != null){
+               changeActivity();
+           }
         });
         TabelaAdapter adapter = new TabelaAdapter(this, tabela);
         gridView.setAdapter(adapter);
@@ -63,13 +67,15 @@ public class TabelaActivity extends AppCompatActivity {
         call.enqueue(new Callback<Fase>() {
             @Override
             public void onResponse(Call<Fase> call, Response<Fase> response) {
-
-                Log.d("Response", String.valueOf(call.request()));
-                Fase fase = response.body();
-                List<Fase.Tabela> tabelaRes = fase.getTabela();
-                tabela.addAll(tabelaRes);
-                gridView.invalidateViews();
-
+                if(response.code() == 200) {
+                    Log.d("Response", String.valueOf(call.request()));
+                    Fase fase = response.body();
+                    List<Fase.Tabela> tabelaRes = fase.getTabela();
+                    tabela.addAll(tabelaRes);
+                    gridView.invalidateViews();
+                }else{
+                    showMessage("Não foi possível obter a tabela, retorne mais tarde");
+                }
             }
 
             @Override
@@ -77,6 +83,17 @@ public class TabelaActivity extends AppCompatActivity {
                 Log.d("Erro", t.getMessage());
             }
         });
+    }
 
+    public void showMessage(String message){
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    public void changeActivity(){
+        Intent newIntent = new Intent(this, RodadaActivity.class);
+        newIntent.putExtra("campeonato", id);
+        newIntent.putExtra("rodada", rodada);
+        newIntent.putExtra("nome", nome);
+        startActivity(newIntent);
     }
 }
