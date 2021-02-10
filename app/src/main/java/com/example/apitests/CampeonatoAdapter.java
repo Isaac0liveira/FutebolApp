@@ -14,7 +14,11 @@ import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,9 +55,15 @@ public class CampeonatoAdapter extends BaseAdapter {
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 
         private ImageView bmImage;
+        private ConstraintLayout view;
+        ProgressBar progressBar;
 
-        public DownloadImageTask(ImageView bmImage) {
+        public DownloadImageTask(ImageView bmImage, View view) {
             this.bmImage = bmImage;
+            this.view = view.findViewById(R.id.constraintLayout);
+            progressBar = view.findViewById(R.id.progressBar);
+            this.view.setVisibility(View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
         }
 
 
@@ -74,7 +84,10 @@ public class CampeonatoAdapter extends BaseAdapter {
 
         protected void onPostExecute(Bitmap result) {
             //set image of your imageview
+
             bmImage.setImageBitmap(result);
+            progressBar.setVisibility(View.GONE);
+            view.setVisibility(View.VISIBLE);
             this.cancel(true);
         }
     }
@@ -96,8 +109,7 @@ public class CampeonatoAdapter extends BaseAdapter {
             view.findViewById(R.id.textView3).setAlpha(0.1f);
             view.findViewById(R.id.textView5).setAlpha(0.1f);
         }
-        new DownloadImageTask(view.findViewById(R.id.imageView))
-                .execute(campeonato.getLogo());
+        new DownloadImageTask(view.findViewById(R.id.imageView), view).execute(campeonato.getLogo());
         view.findViewById(R.id.imageView).invalidate();
         return view;
     }

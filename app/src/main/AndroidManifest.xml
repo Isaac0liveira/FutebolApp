@@ -11,10 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ApiTests">
-        <activity android:name=".FaseActivity"></activity>
-        <activity android:name=".RodadaActivity" />
-        <activity android:name=".TabelaActivity" />
-        <activity android:name=".CampeonatoActivity">
+        <activity android:name=".FaseActivity" android:configChanges="orientation|keyboardHidden|screenSize|uiMode"></activity>
+        <activity android:name=".RodadaActivity" android:configChanges="orientation|keyboardHidden|screenSize|uiMode" />
+        <activity android:name=".TabelaActivity" android:configChanges="orientation|keyboardHidden|screenSize|uiMode" />
+        <activity android:name=".CampeonatoActivity" android:configChanges="orientation|keyboardHidden|screenSize|uiMode">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

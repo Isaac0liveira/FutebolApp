@@ -2,10 +2,12 @@ package com.example.apitests;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,12 +26,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FaseActivity extends AppCompatActivity {
 
-    List<Fase.Chave> chaves= new ArrayList<Fase.Chave>();
     TextView faseAtual;
     Api api;
     Retrofit retrofit;
     ListView listChaves;
-    FaseAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,53 +55,64 @@ public class FaseActivity extends AppCompatActivity {
         call(campeonato, fase);
     }
 
-    public void call(String novoCampeonato, String novaFase){
+    public void call(String novoCampeonato, String novaFase) {
+        listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+        listChaves.setVisibility(View.INVISIBLE);
         List<Fase.Chave> chaves = new ArrayList<Fase.Chave>();
         FaseAdapter adapter = new FaseAdapter(this, chaves);
         listChaves.setAdapter(adapter);
         getSupportActionBar().setSubtitle("Fase " + novaFase);
         faseAtual = findViewById(R.id.fase_atual);
         faseAtual.setText("Fase " + novaFase);
+        faseAtual.setVisibility(View.VISIBLE);
         Call<Fase> callFase = api.getFase(novoCampeonato, novaFase);
         callFase.enqueue(new Callback<Fase>() {
+            @SuppressLint("ClickableViewAccessibility")
             @Override
             public void onResponse(Call<Fase> call, Response<Fase> response) {
                 chaves.clear();
-                if(response.code() == 200) {
+                if (response.code() == 200) {
                     Fase proxima = null;
                     Fase anterior = null;
-                    if(response.body().getProxima_fase() != null){
-                        proxima = response.body().getProxima_fase();
-                    }
-                    if(response.body().getFase_anterior() != null) {
+                    if (response.body().getFase_anterior() != null) {
                         anterior = response.body().getFase_anterior();
                     }
-                    if(proxima != null){
-                        TextView txtProxima = findViewById(R.id.txtProxFase);
-                        txtProxima.setVisibility(View.VISIBLE);
-                        Fase finalProxima = proxima;
-                        txtProxima.setOnClickListener(v -> {
-                            call(novoCampeonato, String.valueOf(finalProxima.getFase_id()));
-                        });
-                    }else{
-                        TextView txtProxima = findViewById(R.id.txtProxFase);
-                        txtProxima.setVisibility(View.GONE);
+                    if (response.body().getProxima_fase() != null) {
+                        proxima = response.body().getProxima_fase();
                     }
-                    if(anterior != null){
-                        TextView txtAnterior = findViewById(R.id.txtAntFase);
-                        txtAnterior.setVisibility(View.VISIBLE);
-                        Fase finalAnterior = anterior;
-                        txtAnterior.setOnClickListener(v -> {
-                            call(novoCampeonato, String.valueOf(finalAnterior.getFase_id()));
-                        });
-                    }else{
-                        TextView txtAnterior = findViewById(R.id.txtAntFase);
-                        txtAnterior.setVisibility(View.GONE);
-                    }
+                    Fase finalAnterior = anterior;
+                    Fase finalProxima = proxima;
+                    listChaves.setOnTouchListener(new OnSwipeTouchListener(FaseActivity.this) {
+                        @Override
+                        public void onSwipeRight() {
+                            if (finalAnterior != null) {
+                                new Thread(() -> {
+                                    listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                    faseAtual.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                    listChaves.setVisibility(View.INVISIBLE);
+                                    faseAtual.setVisibility(View.INVISIBLE);
+                                }).start();
+                                Toast.makeText(FaseActivity.this, "left", Toast.LENGTH_SHORT).show();
+                                call(novoCampeonato, finalAnterior.getFase_id());
+                            }
+                        }
+
+                        @Override
+                        public void onSwipeLeft() {
+                            if (finalProxima != null) {
+                                listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                faseAtual.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                Toast.makeText(FaseActivity.this, "right", Toast.LENGTH_SHORT).show();
+                                call(novoCampeonato, finalProxima.getFase_id());
+                            }
+                        }
+                    });
                     chaves.addAll(response.body().getChaves());
                     Collections.sort(chaves, new sortChave());
+                    listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_in));
                     listChaves.invalidateViews();
-                }else{
+                    listChaves.setVisibility(View.VISIBLE);
+                } else {
                     showMessage("Não foi possível obter a fase, retorne mais tarde");
                 }
             }
@@ -114,50 +125,52 @@ public class FaseActivity extends AppCompatActivity {
         });
     }
 
-    public void callSemVolta(String novoCampeonato, String novaFase){
-        List<FaseSemVolta.Chave> chaves= new ArrayList<FaseSemVolta.Chave>();
+    public void callSemVolta(String novoCampeonato, String novaFase) {
+        List<FaseSemVolta.Chave> chaves = new ArrayList<FaseSemVolta.Chave>();
         FaseSemVoltaAdapter adapter = new FaseSemVoltaAdapter(this, chaves);
         listChaves.setAdapter(adapter);
         Call<FaseSemVolta> callFase = api.getFaseSemVolta(novoCampeonato, novaFase);
         callFase.enqueue(new Callback<FaseSemVolta>() {
+            @SuppressLint("ClickableViewAccessibility")
             @Override
             public void onResponse(Call<FaseSemVolta> call, Response<FaseSemVolta> response) {
                 chaves.clear();
-                if(response.code() == 200) {
+                if (response.code() == 200) {
                     Fase proxima = null;
                     Fase anterior = null;
-                    if(response.body().getProxima_fase() != null){
-                        proxima = response.body().getProxima_fase();
-                    }
-                    if(response.body().getFase_anterior() != null) {
+                    if (response.body().getFase_anterior() != null) {
                         anterior = response.body().getFase_anterior();
                     }
-                    if(proxima != null){
-                        TextView txtProxima = findViewById(R.id.txtProxFase);
-                        txtProxima.setVisibility(View.VISIBLE);
-                        Fase finalProxima = proxima;
-                        txtProxima.setOnClickListener(v -> {
-                            call(novoCampeonato, String.valueOf(finalProxima.getFase_id()));
-                        });
-                    }else{
-                        TextView txtProxima = findViewById(R.id.txtProxFase);
-                        txtProxima.setVisibility(View.GONE);
+                    if (response.body().getProxima_fase() != null) {
+                        proxima = response.body().getProxima_fase();
                     }
-                    if(anterior != null){
-                        TextView txtAnterior = findViewById(R.id.txtAntFase);
-                        txtAnterior.setVisibility(View.VISIBLE);
-                        Fase finalAnterior = anterior;
-                        txtAnterior.setOnClickListener(v -> {
-                            call(novoCampeonato, String.valueOf(finalAnterior.getFase_id()));
-                        });
-                    }else{
-                        TextView txtAnterior = findViewById(R.id.txtAntFase);
-                        txtAnterior.setVisibility(View.GONE);
-                    }
+                    Fase finalAnterior = anterior;
+                    Fase finalProxima = proxima;
+                    listChaves.setOnTouchListener(new OnSwipeTouchListener(FaseActivity.this) {
+                        @Override
+                        public void onSwipeRight() {
+                            if (finalAnterior != null) {
+                                listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                faseAtual.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                Toast.makeText(FaseActivity.this, "left", Toast.LENGTH_SHORT).show();
+                                call(novoCampeonato, finalAnterior.getFase_id());
+                            }
+                        }
+
+                        @Override
+                        public void onSwipeLeft() {
+                            if (finalProxima != null) {
+                                listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                faseAtual.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                Toast.makeText(FaseActivity.this, "right", Toast.LENGTH_SHORT).show();
+                                call(novoCampeonato, finalProxima.getFase_id());
+                            }
+                        }
+                    });
                     chaves.addAll(response.body().getChaves());
                     Collections.sort(chaves, new FaseActivity.sortChaveSemVolta());
                     listChaves.invalidateViews();
-                }else{
+                } else {
                     showMessage("Não foi possível obter a fase, retorne mais tarde");
                 }
             }
@@ -169,28 +182,24 @@ public class FaseActivity extends AppCompatActivity {
         });
     }
 
-    class sortChave implements Comparator<Fase.Chave>
-    {
+    class sortChave implements Comparator<Fase.Chave> {
         // Used for sorting in ascending order of
         // roll number
-        public int compare(Fase.Chave a, Fase.Chave b)
-        {
-            return Integer.parseInt(a.getNome().replaceAll("\\D+","")) - Integer.parseInt(b.getNome().replaceAll("\\D+",""));
+        public int compare(Fase.Chave a, Fase.Chave b) {
+            return Integer.parseInt(a.getNome().replaceAll("\\D+", "")) - Integer.parseInt(b.getNome().replaceAll("\\D+", ""));
         }
     }
 
-    class sortChaveSemVolta implements Comparator<FaseSemVolta.Chave>
-    {
+    class sortChaveSemVolta implements Comparator<FaseSemVolta.Chave> {
         // Used for sorting in ascending order of
         // roll number
-        public int compare(FaseSemVolta.Chave a, FaseSemVolta.Chave b)
-        {
-            return Integer.parseInt(a.getNome().replaceAll("\\D+","")) - Integer.parseInt(b.getNome().replaceAll("\\D+",""));
+        public int compare(FaseSemVolta.Chave a, FaseSemVolta.Chave b) {
+            return Integer.parseInt(a.getNome().replaceAll("\\D+", "")) - Integer.parseInt(b.getNome().replaceAll("\\D+", ""));
         }
     }
 
 
-    public void showMessage(String message){
+    public void showMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

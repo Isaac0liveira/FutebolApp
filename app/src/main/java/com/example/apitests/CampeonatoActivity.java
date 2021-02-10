@@ -2,17 +2,25 @@ package com.example.apitests;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,9 +33,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class CampeonatoActivity extends AppCompatActivity {
 
     Api api;
-    ArrayAdapter adapter;
     List<Campeonato> campeonatos = new ArrayList<>();
     ListView listView;
+    SwipeRefreshLayout swipeRefreshLayout;
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -39,6 +48,18 @@ public class CampeonatoActivity extends AppCompatActivity {
 
         api = retrofit.create(Api.class);
 
+        swipeRefreshLayout = findViewById(R.id.swipe);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            swipeRefreshLayout.setRefreshing(true);
+            campeonatos.clear();
+            init();
+        });
+
+        init();
+
+    }
+
+    public void init(){
         listView = findViewById(R.id.listView);
         getCampeonatos();
         CampeonatoAdapter adapter = new CampeonatoAdapter(this, campeonatos);
@@ -66,8 +87,8 @@ public class CampeonatoActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Carregando Campeonatos...", Toast.LENGTH_SHORT).show();
         new Handler().postDelayed(() -> {
             listView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
-            listView.setVisibility(View.VISIBLE);
             listView.invalidateViews();
+            listView.setVisibility(View.VISIBLE);
         }, 3000);
     }
 
@@ -100,6 +121,7 @@ public class CampeonatoActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     public void getCampeonato(String id, int pos){
