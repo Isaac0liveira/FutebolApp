@@ -1,12 +1,11 @@
 package com.example.apitests;
 
-import java.io.Serializable;
 import java.util.List;
 
-public class Fase implements Serializable {
+public class FaseSemVolta {
     private String fase_id;
-    private List<Tabela> tabela;
-    private List<Chave> chaves;
+    private List<Fase.Tabela> tabela;
+    private List<FaseSemVolta.Chave> chaves;
     private Fase fase_anterior;
     private Fase proxima_fase;
     private boolean ida_e_volta;
@@ -14,7 +13,6 @@ public class Fase implements Serializable {
     public class Chave{
         private String nome;
         private Rodada.Partida partida_ida;
-        private Rodada.Partida partida_volta;
 
         public String getNome() {
             return nome;
@@ -32,18 +30,11 @@ public class Fase implements Serializable {
             this.partida_ida = partida_ida;
         }
 
-        public Rodada.Partida getPartida_volta() {
-            return partida_volta;
-        }
-
-        public void setPartida_volta(Rodada.Partida partida_volta) {
-            this.partida_volta = partida_volta;
-        }
     }
 
     public class Tabela {
         private int posicao;
-        private Time time;
+        private Fase.Tabela.Time time;
         private int pontos;
         private int jogos;
         private int vitorias;
@@ -68,11 +59,11 @@ public class Fase implements Serializable {
             }
         }
 
-        public Time getTime() {
+        public Fase.Tabela.Time getTime() {
             return time;
         }
 
-        public void setTime(Time time) {
+        public void setTime(Fase.Tabela.Time time) {
             this.time = time;
         }
 
@@ -181,19 +172,19 @@ public class Fase implements Serializable {
         this.fase_id = fase_id;
     }
 
-    public List<Tabela> getTabela() {
+    public List<Fase.Tabela> getTabela() {
         return tabela;
     }
 
-    public void setTabela(List<Tabela> tabela) {
+    public void setTabela(List<Fase.Tabela> tabela) {
         this.tabela = tabela;
     }
 
-    public List<Chave> getChaves() {
+    public List<FaseSemVolta.Chave> getChaves() {
         return chaves;
     }
 
-    public void setChaves(List<Chave> chaves) {
+    public void setChaves(List<FaseSemVolta.Chave> chaves) {
         this.chaves = chaves;
     }
 

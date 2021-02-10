@@ -12,12 +12,12 @@ import org.w3c.dom.Text;
 
 import java.util.List;
 
-public class FaseAdapter extends BaseAdapter {
+public class FaseSemVoltaAdapter extends BaseAdapter {
 
-    List<Fase.Chave> chaves;
+    List<FaseSemVolta.Chave> chaves;
     Activity activity;
 
-    public FaseAdapter(Activity activity, List<Fase.Chave> fase){
+    public FaseSemVoltaAdapter(Activity activity, List<FaseSemVolta.Chave> fase){
         this.activity = activity;
         this.chaves = fase;
     }
@@ -86,36 +86,17 @@ public class FaseAdapter extends BaseAdapter {
         txtHora.setText(partidaIda.getHora_realizacao());
         txtEstadio.setText(partidaIda.getEstadio().getNome_popular());
 
-        if(chaves.get(position).getPartida_volta() == null){
-            mandanteVolta.setVisibility(View.GONE);
-            visitanteVolta.setVisibility(View.GONE);
-            golMandanteVolta.setVisibility(View.GONE);
-            golVisitanteVolta.setVisibility(View.GONE);
-            txtStatusVolta.setVisibility(View.GONE);
-            txtDataVolta.setVisibility(View.GONE);
-            txtHoraVolta.setVisibility(View.GONE);
-            txtEstadioVolta.setVisibility(View.GONE);
-        }else {
-            Rodada.Partida partidaVolta = chaves.get(position).getPartida_volta();
-            mandanteVolta.setText(partidaVolta.getTime_mandante().getNome_popular());
-            visitanteVolta.setText(partidaVolta.getTime_visitante().getNome_popular());
-            golMandanteVolta.setText(String.valueOf(partidaVolta.getPlacar_mandante()));
-            golVisitanteVolta.setText(String.valueOf(partidaVolta.getPlacar_visitante()));
-            if(partidaVolta.getStatus().equals("finalizado")){
-                txtStatusVolta.setText("Finalizado");
-                txtStatusVolta.setTextColor(Color.BLUE);
-            }else{
-                txtStatusVolta.setText("Agendado");
-                txtStatusVolta.setTextColor(Color.GREEN);
-            }
-            txtDataVolta.setText(partidaVolta.getData_realizacao());
-            txtHoraVolta.setText(partidaVolta.getHora_realizacao());
-            txtEstadioVolta.setText(partidaVolta.getEstadio().getNome_popular());
-        }
 
-
-
+        mandanteVolta.setVisibility(View.GONE);
+        visitanteVolta.setVisibility(View.GONE);
+        golMandanteVolta.setVisibility(View.GONE);
+        golVisitanteVolta.setVisibility(View.GONE);
+        txtStatusVolta.setVisibility(View.GONE);
+        txtDataVolta.setVisibility(View.GONE);
+        txtHoraVolta.setVisibility(View.GONE);
+        txtEstadioVolta.setVisibility(View.GONE);
 
         return v;
     }
 }
+
