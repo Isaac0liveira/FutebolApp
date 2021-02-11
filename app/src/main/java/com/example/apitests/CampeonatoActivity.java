@@ -31,11 +31,14 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CampeonatoActivity extends AppCompatActivity {
-
-    Api api;
+    CampeonatoDAO dao;
     List<Campeonato> campeonatos = new ArrayList<>();
-    ListView listView;
     SwipeRefreshLayout swipeRefreshLayout;
+    Api api;
+    ListView listView;
+    CampeonatoAdapter adapter;
+
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,22 +50,10 @@ public class CampeonatoActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         api = retrofit.create(Api.class);
+        dao = new CampeonatoDAO(this);
 
-        swipeRefreshLayout = findViewById(R.id.swipe);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            swipeRefreshLayout.setRefreshing(true);
-            campeonatos.clear();
-            init();
-        });
-
-        init();
-
-    }
-
-    public void init(){
         listView = findViewById(R.id.listView);
-        getCampeonatos();
-        CampeonatoAdapter adapter = new CampeonatoAdapter(this, campeonatos);
+        adapter = new CampeonatoAdapter(this, campeonatos);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener((parent, view, position, id) -> {
             if(campeonatos.get(position).isPlano()){
@@ -84,32 +75,54 @@ public class CampeonatoActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Campeonato Não Disponível", Toast.LENGTH_SHORT).show();
             }
         });
+        init();
         Toast.makeText(getApplicationContext(), "Carregando Campeonatos...", Toast.LENGTH_SHORT).show();
         new Handler().postDelayed(() -> {
             listView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
             listView.invalidateViews();
             listView.setVisibility(View.VISIBLE);
         }, 3000);
+
+        swipeRefreshLayout = findViewById(R.id.swipe);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            swipeRefreshLayout.setRefreshing(true);
+            campeonatos.clear();
+            getCampeonatos();
+        });
+    }
+
+    public void init(){
+        if(dao.obterLista().size() == 0) {
+            getCampeonatos();
+        }else{
+            campeonatos.clear();
+            List<Campeonato> campeonatoes = dao.obterLista();
+            campeonatos.addAll(campeonatoes);
+            listView.invalidateViews();
+            listView.setVisibility(View.VISIBLE);
+        }
     }
 
     public void getCampeonatos(){
+        dao.atualizar();
         Call<List<Campeonato>> call = api.getCampeonatos();
-
         call.enqueue(new Callback<List<Campeonato>>() {
             @Override
             public void onResponse(Call<List<Campeonato>> call, Response<List<Campeonato>> response) {
-                Log.d("Responses", call.request().toString());
-                Log.d("Responses", response.message());
-                Log.d("Responses", String.valueOf(response.code()));
                 if(response.code() == 200) {
                     List<Campeonato> campeonatoes = response.body();
-                    campeonatos.addAll(campeonatoes);
-                    Log.d("response", response.body().toString());
                     int pos = 0;
                     listView.setVisibility(View.INVISIBLE);
                     for (Campeonato c : campeonatoes) {
-                        getCampeonato(String.valueOf(c.getCampeonato_id()), pos);
+                        getCampeonato(String.valueOf(c.getCampeonato_id()));
                         pos++;
+                        if(pos == campeonatoes.size()){
+                            if(swipeRefreshLayout.isRefreshing()) {
+                                swipeRefreshLayout.setRefreshing(false);
+                                listView.invalidateViews();
+                            }
+                            init();
+                        }
                     }
                 }else{
                     showMessage("Não foi possível obter a lista de campeonatos, retorne mais tarde");
@@ -121,10 +134,9 @@ public class CampeonatoActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-        swipeRefreshLayout.setRefreshing(false);
     }
 
-    public void getCampeonato(String id, int pos){
+    public void getCampeonato(String id){
         Call<Campeonato> call = api.getCampeonato(id);
 
         call.enqueue(new Callback<Campeonato>() {
@@ -132,18 +144,20 @@ public class CampeonatoActivity extends AppCompatActivity {
             public void onResponse(Call<Campeonato> call, Response<Campeonato> response) {
                 if(response.code() == 200) {
                     Campeonato compare = response.body();
-                    Log.d("Retorno", response.toString());
+                    Log.d("Retorno", response.body().toString());
+                    int pos = 0;
                     for (Campeonato c : campeonatos) {
                         if ((compare != null ? compare.getCampeonato_id() : -1) == c.getCampeonato_id()) {
-                            c.setPlano(true);
-                            Log.d("Retorno", c.getNome_popular() + "== true");
+                            campeonatos.get(pos).setPlano(true);
                         }
+                        pos++;
                     }
                 }else{
                     for(Campeonato c: campeonatos){
                         if(Integer.parseInt(id) == c.getCampeonato_id()){
                             c.setPlano(false);
                             Log.d("Retorno", c.getNome_popular() + "== false");
+                            Log.d("Response", String.valueOf(response.code()));
                         }
                     }
                 }

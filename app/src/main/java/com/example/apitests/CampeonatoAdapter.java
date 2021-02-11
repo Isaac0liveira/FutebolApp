@@ -102,6 +102,7 @@ public class CampeonatoAdapter extends BaseAdapter {
         nome.setText(campeonato.getNome());
         tipo.setText(campeonato.getTipo());
         fase.setText(campeonato.getFase_atual().getNome());
+        Log.d("plano", String.valueOf(campeonato.isPlano()));
         if(!campeonato.isPlano()){
             nome.setAlpha(0.1f);
             tipo.setAlpha(0.1f);
@@ -111,6 +112,7 @@ public class CampeonatoAdapter extends BaseAdapter {
         }
         new DownloadImageTask(view.findViewById(R.id.imageView), view).execute(campeonato.getLogo());
         view.findViewById(R.id.imageView).invalidate();
+        view.invalidate();
         return view;
     }
 }

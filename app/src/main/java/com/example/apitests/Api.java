@@ -16,7 +16,7 @@ import retrofit2.http.Path;
 public interface Api {
 
     String BASE_URL = "https://api.api-futebol.com.br/v1/";
-    String Auth = "live_1377d15aa59339b8bdd3da9ce1c2a8"; //Coloque a API Key aqui
+    String Auth = "test_ab46a33ce6bb33260701e2de707e91"; //Coloque a API Key aqui
     //live_32731f223b23e3d6d70558a3e47a6f
     @Headers({"Authorization: Bearer " + Auth})
     @GET("campeonatos")
@@ -37,8 +37,6 @@ public interface Api {
     @Headers({"Authorization: Bearer " + Auth})
     @GET("campeonatos/{campeonato}/rodadas/{rodada}")
     Call<Rodada> getRodada(@Path("campeonato") String campeonato, @Path("rodada") String rodada);
-
-
 
 
 }

@@ -14,7 +14,7 @@ public class Campeonato implements Serializable {
     private String tipo;
     private boolean plano;
 
-    public class Rodada{
+    public static class Rodada{
         private int rodada;
 
         public int getRodada() {
@@ -27,7 +27,7 @@ public class Campeonato implements Serializable {
     }
 
 
-    public class Edicao {
+    public static class Edicao {
         private int edicao_id;
         private String temporada;
         private String nome;
@@ -75,16 +75,16 @@ public class Campeonato implements Serializable {
         }
     }
 
-    public class FaseAtual {
-        private String fase_id;
+    public static class FaseAtual {
+        private int fase_id;
         private String tipo;
         private String nome;
 
-        public String getFase_id() {
+        public int getFase_id() {
             return fase_id;
         }
 
-        public void setFase_id(String fase_id) {
+        public void setFase_id(int fase_id) {
             this.fase_id = fase_id;
         }
 
