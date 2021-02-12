@@ -10,7 +10,7 @@ public class Rodada {
     private Rodada proxima_rodada;
     private List<Partida> partidas;
 
-    public class Partida{
+    public static class Partida{
 
         private int partida_id;
         private Time time_mandante;
@@ -23,7 +23,7 @@ public class Rodada {
         private Estadio estadio;
 
 
-        public class Time{
+        public static class Time{
 
             private String nome_popular;
 
@@ -37,7 +37,7 @@ public class Rodada {
 
         }
 
-        public class Estadio{
+        public static class Estadio{
 
             private String nome_popular;
 

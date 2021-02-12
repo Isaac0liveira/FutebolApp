@@ -7,6 +7,7 @@ public class Fase implements Serializable {
     private String fase_id;
     private List<Tabela> tabela;
     private List<Chave> chaves;
+    private Campeonato campeonato;
     private Fase fase_anterior;
     private Fase proxima_fase;
     private boolean ida_e_volta;
@@ -41,7 +42,7 @@ public class Fase implements Serializable {
         }
     }
 
-    public class Tabela {
+    public static class Tabela {
         private int posicao;
         private Time time;
         private int pontos;
@@ -55,8 +56,9 @@ public class Fase implements Serializable {
         private float aproveitamento;
         private int variacao_posicao;
         private String[] ultimos_jogos;
+        private String v_ultimos_jogos;
 
-        public class Time{
+        public static class Time{
             private String nome_popular;
 
             public String getNome_popular() {
@@ -171,6 +173,14 @@ public class Fase implements Serializable {
         public void setUltimos_jogos(String[] ultimos_jogos) {
             this.ultimos_jogos = ultimos_jogos;
         }
+
+        public String getV_ultimos_jogos() {
+            return v_ultimos_jogos;
+        }
+
+        public void setV_ultimos_jogos(String v_ultimos_jogos) {
+            this.v_ultimos_jogos = v_ultimos_jogos;
+        }
     }
 
     public String getFase_id() {
@@ -213,12 +223,19 @@ public class Fase implements Serializable {
         this.proxima_fase = proxima_fase;
     }
 
-
     public boolean isIda_e_volta() {
         return ida_e_volta;
     }
 
     public void setIda_e_volta(boolean ida_e_volta) {
         this.ida_e_volta = ida_e_volta;
+    }
+
+    public Campeonato getCampeonato() {
+        return campeonato;
+    }
+
+    public void setCampeonato(Campeonato campeonato) {
+        this.campeonato = campeonato;
     }
 }

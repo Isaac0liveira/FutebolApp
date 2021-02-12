@@ -68,10 +68,6 @@ public class CampeonatoDAO {
             }
             campeonatos.add(campeonato);
         }
-        for (Campeonato c: campeonatos){
-            Log.d("Ca:", String.valueOf(c.isPlano()));
-            Log.d("Ca:", c.getLogo());
-        }
         return campeonatos;
     }
 
@@ -83,7 +79,6 @@ public class CampeonatoDAO {
         values.put("nome_popular", campeonato.getNome_popular());
         values.put("logo", campeonato.getLogo());
         values.put("tipo", campeonato.getTipo());
-        values.put("rodada_id", campeonato.getRodada_atual().getRodada());
         values.put("edicao_id", campeonato.getEdicao_atual().getEdicao_id());
         values.put("fase_atual_id", campeonato.getFase_atual().getFase_id());
         if(campeonato.isPlano()){
@@ -91,9 +86,13 @@ public class CampeonatoDAO {
         }else{
             values.put("plano", 0);
         }
-        ContentValues valuesRodada = new ContentValues();
-        valuesRodada.put("rodada", campeonato.getRodada_atual().getRodada());
         ContentValues valuesEdicao = new ContentValues();
+        if (campeonato.getRodada_atual() != null) {
+            ContentValues valuesRodada = new ContentValues();
+            values.put("rodada_id", campeonato.getRodada_atual().getRodada());
+            valuesRodada.put("rodada", campeonato.getRodada_atual().getRodada());
+            banco.insert("rodada", null, valuesRodada);
+        }
         valuesEdicao.put("edicao_id", campeonato.getEdicao_atual().getEdicao_id());
         valuesEdicao.put("temporada", campeonato.getEdicao_atual().getTemporada());
         valuesEdicao.put("nome", campeonato.getEdicao_atual().getNome());
@@ -103,7 +102,6 @@ public class CampeonatoDAO {
         valuesFase.put("fase_id", campeonato.getFase_atual().getFase_id());
         valuesFase.put("tipo", campeonato.getFase_atual().getTipo());
         valuesFase.put("nome", campeonato.getFase_atual().getNome());
-        banco.insert("rodada", null, valuesRodada);
         banco.insert("edicao", null, valuesEdicao);
         banco.insert("fase_atual", null, valuesFase);
         return banco.insert("campeonato", null, values);

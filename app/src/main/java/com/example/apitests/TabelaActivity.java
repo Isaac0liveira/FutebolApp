@@ -1,21 +1,18 @@
 package com.example.apitests;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.tabs.TabLayout;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -31,52 +28,84 @@ public class TabelaActivity extends AppCompatActivity {
     String rodada;
     String id;
     String fase;
+    Api api;
+    TabelaDAO dao;
+    Retrofit retrofit;
+    ListView gridView;
+    SwipeRefreshLayout swipeRefreshLayout;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tabela);
-        Retrofit retrofit = new Retrofit.Builder().baseUrl(Api.BASE_URL)
+        retrofit = new Retrofit.Builder().baseUrl(Api.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
-        Api api = retrofit.create(Api.class);
-
-
+        api = retrofit.create(Api.class);
         Intent intent = getIntent();
+        dao = new TabelaDAO(this);
         nome = (String) intent.getSerializableExtra("nome");
         rodada = (String) intent.getSerializableExtra("rodada");
         id = (String) intent.getSerializableExtra("id");
         fase = (String) intent.getSerializableExtra("fase");
-
-
-        ListView gridView = findViewById(R.id.gridView);
+        gridView = findViewById(R.id.gridView);
+        progressBar = findViewById(R.id.progressBar2);
+        gridView.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
         TextView rodadaTxt = findViewById(R.id.rodadaTxt);
         rodadaTxt.setOnClickListener(v -> {
            if(rodada != null){
-               changeActivity();
+               Intent newIntent = new Intent(TabelaActivity.this, RodadaActivity.class);
+               newIntent.putExtra("campeonato", id);
+               newIntent.putExtra("rodada", rodada);
+               newIntent.putExtra("nome", nome);
+               startActivity(newIntent);
            }
         });
         TabelaAdapter adapter = new TabelaAdapter(this, tabela);
         gridView.setAdapter(adapter);
-
+        swipeRefreshLayout = findViewById(R.id.swipeRodada);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            gridView.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
+            swipeRefreshLayout.setRefreshing(true);
+            dao.atualizar();
+            tabela.clear();
+            getTabela();
+        });
 
         this.setTitle(nome);
         getSupportActionBar().setSubtitle("Tabela");
+        init();
+    }
 
+    public void init(){
+        if(swipeRefreshLayout != null) {
+            if (swipeRefreshLayout.isRefreshing()) {
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        }
+        if(dao.obterTabela(id).size() == 0){
+            getTabela();
+        }else {
+            tabela.addAll(dao.obterTabela(id));
+            gridView.invalidateViews();
+            gridView.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
+        }
+    }
 
+    public void getTabela(){
         Call<Fase> call = api.getFase(id, fase);
-        Log.d("request", call.request().toString());
         call.enqueue(new Callback<Fase>() {
             @Override
             public void onResponse(Call<Fase> call, Response<Fase> response) {
                 if(response.code() == 200) {
-                    Log.d("Response", String.valueOf(call.request()));
-                    Fase fase = response.body();
-                    List<Fase.Tabela> tabelaRes = fase.getTabela();
-                    tabela.addAll(tabelaRes);
-                    gridView.invalidateViews();
+                    dao.adicionar(response.body());
                 }else{
-                    showMessage("Não foi possível obter a tabela, retorne mais tarde");
+                    Toast.makeText(TabelaActivity.this, "Não foi possível obter a tabela, retorne mais tarde", Toast.LENGTH_SHORT).show();
                 }
+                init();
             }
 
             @Override
@@ -84,17 +113,5 @@ public class TabelaActivity extends AppCompatActivity {
                 Log.d("Erro", t.getMessage());
             }
         });
-    }
-
-    public void showMessage(String message){
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
-    public void changeActivity(){
-        Intent newIntent = new Intent(this, RodadaActivity.class);
-        newIntent.putExtra("campeonato", id);
-        newIntent.putExtra("rodada", rodada);
-        newIntent.putExtra("nome", nome);
-        startActivity(newIntent);
     }
 }

@@ -2,25 +2,19 @@ package com.example.apitests;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,40 +32,38 @@ public class CampeonatoActivity extends AppCompatActivity {
     ListView listView;
     CampeonatoAdapter adapter;
 
-
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.deleteDatabase("tabela");
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         Retrofit retrofit = new Retrofit.Builder().baseUrl(Api.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
-
         api = retrofit.create(Api.class);
         dao = new CampeonatoDAO(this);
-
         listView = findViewById(R.id.listView);
         adapter = new CampeonatoAdapter(this, campeonatos);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener((parent, view, position, id) -> {
-            if(campeonatos.get(position).isPlano()){
-                if(campeonatos.get(position).getFase_atual().getTipo().equals("pontos-corridos")){
+            if (campeonatos.get(position).isPlano()) {
+                if (campeonatos.get(position).getFase_atual().getTipo().equals("pontos-corridos")) {
                     Intent intent = new Intent(this, TabelaActivity.class);
                     intent.putExtra("nome", campeonatos.get(position).getNome());
                     intent.putExtra("rodada", String.valueOf(campeonatos.get(position).getRodada_atual().getRodada()));
                     intent.putExtra("id", String.valueOf(campeonatos.get(position).getCampeonato_id()));
                     intent.putExtra("fase", String.valueOf(campeonatos.get(position).getFase_atual().getFase_id()));
                     startActivity(intent);
-                }else{
+                } else {
                     Intent intent = new Intent(this, FaseActivity.class);
                     intent.putExtra("nome", campeonatos.get(position).getNome());
                     intent.putExtra("campeonato", String.valueOf(campeonatos.get(position).getCampeonato_id()));
                     intent.putExtra("fase", String.valueOf(campeonatos.get(position).getFase_atual().getFase_id()));
                     startActivity(intent);
                 }
-            }else{
+            } else {
                 Toast.makeText(getApplicationContext(), "Campeonato Não Disponível", Toast.LENGTH_SHORT).show();
             }
         });
@@ -83,49 +75,41 @@ public class CampeonatoActivity extends AppCompatActivity {
             listView.setVisibility(View.VISIBLE);
         }, 3000);
 
-        swipeRefreshLayout = findViewById(R.id.swipe);
+        swipeRefreshLayout = findViewById(R.id.swipeRodada);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             swipeRefreshLayout.setRefreshing(true);
+            dao.atualizar();
             campeonatos.clear();
             getCampeonatos();
         });
     }
 
-    public void init(){
-        if(dao.obterLista().size() == 0) {
+    public void init() {
+        if(swipeRefreshLayout != null) {
+            if (swipeRefreshLayout.isRefreshing()) {
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        }
+        if(dao.obterLista().size() == 0){
             getCampeonatos();
-        }else{
-            campeonatos.clear();
-            List<Campeonato> campeonatoes = dao.obterLista();
-            campeonatos.addAll(campeonatoes);
+        }else {
+            campeonatos.addAll(dao.obterLista());
             listView.invalidateViews();
             listView.setVisibility(View.VISIBLE);
         }
     }
 
-    public void getCampeonatos(){
-        dao.atualizar();
+    public void getCampeonatos() {
         Call<List<Campeonato>> call = api.getCampeonatos();
         call.enqueue(new Callback<List<Campeonato>>() {
             @Override
             public void onResponse(Call<List<Campeonato>> call, Response<List<Campeonato>> response) {
-                if(response.code() == 200) {
+                Log.d("Requisição", "Uma requisição foi feita ");
+                if (response.code() == 200) {
                     List<Campeonato> campeonatoes = response.body();
-                    int pos = 0;
-                    listView.setVisibility(View.INVISIBLE);
-                    for (Campeonato c : campeonatoes) {
-                        getCampeonato(String.valueOf(c.getCampeonato_id()));
-                        pos++;
-                        if(pos == campeonatoes.size()){
-                            if(swipeRefreshLayout.isRefreshing()) {
-                                swipeRefreshLayout.setRefreshing(false);
-                                listView.invalidateViews();
-                            }
-                            init();
-                        }
-                    }
-                }else{
-                    showMessage("Não foi possível obter a lista de campeonatos, retorne mais tarde");
+                    getCampeonato(campeonatoes);
+                } else {
+                    Toast.makeText(CampeonatoActivity.this, "Não foi possível obter a lista de campeonatos, retorne mais tarde", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -136,42 +120,26 @@ public class CampeonatoActivity extends AppCompatActivity {
         });
     }
 
-    public void getCampeonato(String id){
-        Call<Campeonato> call = api.getCampeonato(id);
-
-        call.enqueue(new Callback<Campeonato>() {
-            @Override
-            public void onResponse(Call<Campeonato> call, Response<Campeonato> response) {
-                if(response.code() == 200) {
-                    Campeonato compare = response.body();
-                    Log.d("Retorno", response.body().toString());
-                    int pos = 0;
-                    for (Campeonato c : campeonatos) {
-                        if ((compare != null ? compare.getCampeonato_id() : -1) == c.getCampeonato_id()) {
-                            campeonatos.get(pos).setPlano(true);
-                        }
-                        pos++;
-                    }
-                }else{
-                    for(Campeonato c: campeonatos){
-                        if(Integer.parseInt(id) == c.getCampeonato_id()){
-                            c.setPlano(false);
-                            Log.d("Retorno", c.getNome_popular() + "== false");
-                            Log.d("Response", String.valueOf(response.code()));
-                        }
+    public void getCampeonato(List<Campeonato> campeonatoes) {
+        for (Campeonato c : campeonatoes) {
+            Call<Campeonato> call = api.getCampeonato(String.valueOf(c.getCampeonato_id()));
+            call.enqueue(new Callback<Campeonato>() {
+                @Override
+                public void onResponse(Call<Campeonato> call, Response<Campeonato> response) {
+                    Log.d("Requisição", "Uma requisição foi feita: " + c.getCampeonato_id());
+                    if (response.code() == 200) {
+                        c.setPlano(true);
+                        dao.adicionar(c);
+                    } else {
+                        c.setPlano(false);
+                        dao.adicionar(c);
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<Campeonato> call, Throwable t) {
-
-            }
-        });
+                @Override
+                public void onFailure(Call<Campeonato> call, Throwable t) { }
+            });
+        }
+        new Handler().postDelayed(this::init, 1000);
     }
-
-    public void showMessage(String message){
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
 }

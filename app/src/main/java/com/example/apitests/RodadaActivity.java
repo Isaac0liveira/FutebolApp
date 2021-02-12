@@ -1,12 +1,14 @@
 package com.example.apitests;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +28,7 @@ public class RodadaActivity extends AppCompatActivity {
 
     List<Rodada.Partida> partidas = new ArrayList<Rodada.Partida>();
     Api api;
+    RodadaDAO dao;
     Retrofit retrofit;
     ListView listRodadas;
     RodadaAdapter adapter;
@@ -33,32 +36,71 @@ public class RodadaActivity extends AppCompatActivity {
     String rodada;
     String nome;
     TextView rodadaAtual;
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rodada);
-
         retrofit = new Retrofit.Builder().baseUrl(Api.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
         api = retrofit.create(Api.class);
-
+        dao = new RodadaDAO(this);
+        dao.atualizarRodada();
         listRodadas = findViewById(R.id.listRodadas);
         adapter = new RodadaAdapter(this, partidas);
         listRodadas.setAdapter(adapter);
-
         Intent intent = getIntent();
         campeonato = (String) intent.getSerializableExtra("campeonato");
         rodada = (String) intent.getSerializableExtra("rodada");
         nome = (String) intent.getSerializableExtra("nome");
-
         this.setTitle(nome);
-
         rodadaAtual = findViewById(R.id.rodada_atual);
         rodadaAtual.setText("Rodada " + rodada);
+        swipeRefreshLayout = findViewById(R.id.swipeRodada);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            swipeRefreshLayout.setRefreshing(true);
+            dao.atualizarRodada();
+            dao.atualizarPartida();
+            partidas.clear();
+            call(campeonato, rodada);
+        });
+        init(rodada);
+    }
 
-        call(campeonato, rodada);
+    @SuppressLint("ClickableViewAccessibility")
+    public void init(String rodadaID){
+        Rodada copiaRodada = dao.obterRodada(rodadaID);
+        partidas.addAll(copiaRodada.getPartidas());
+        listRodadas.invalidateViews();
+        listRodadas.setOnTouchListener(new OnSwipeTouchListener(RodadaActivity.this) {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onSwipeRight() {
+                if (copiaRodada.getRodada_anterior() != null) {
+                    new Thread(() -> {
+                        partidas.clear();
+                        init(String.valueOf(copiaRodada.getRodada_anterior().getRodada()));
+                        getSupportActionBar().setSubtitle("Rodada " + copiaRodada.getRodada_anterior().getRodada());
+                        rodadaAtual.setText("Rodada " + copiaRodada.getRodada_anterior().getRodada());
+                    }).start();
+                }
+            }
+
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onSwipeLeft() {
+                if ( copiaRodada.getProxima_rodada() != null) {
+                    new Thread(() -> {
+                        partidas.clear();
+                        init(String.valueOf(copiaRodada.getProxima_rodada().getRodada()));
+                        getSupportActionBar().setSubtitle("Rodada " + copiaRodada.getProxima_rodada().getRodada());
+                        rodadaAtual.setText("Rodada " + copiaRodada.getProxima_rodada().getRodada());
+                    }).start();
+                }
+            }
+        });
     }
 
     public void showMessage(String message){
@@ -67,46 +109,13 @@ public class RodadaActivity extends AppCompatActivity {
 
     public void call(String novoCampeonato, String novaRodada){
         getSupportActionBar().setSubtitle("Rodada " + novaRodada);
-        rodadaAtual = findViewById(R.id.rodada_atual);
         rodadaAtual.setText("Rodada " + novaRodada);
         Call<Rodada> callRodada = api.getRodada(novoCampeonato, novaRodada);
         callRodada.enqueue(new Callback<Rodada>() {
             @Override
             public void onResponse(Call<Rodada> call, Response<Rodada> response) {
-                partidas.clear();
                 if(response.code() == 200) {
-                    Rodada proxima = null;
-                    Rodada anterior = null;
-                    if(response.body().getProxima_rodada() != null){
-                        proxima = response.body().getProxima_rodada();
-                    }
-                    if(response.body().getRodada_anterior() != null) {
-                        anterior = response.body().getRodada_anterior();
-                    }
-                    if(proxima != null){
-                        TextView txtProxima = findViewById(R.id.txtProx);
-                        txtProxima.setVisibility(View.VISIBLE);
-                        Rodada finalProxima = proxima;
-                        txtProxima.setOnClickListener(v -> {
-                                call(campeonato, String.valueOf(finalProxima.getRodada()));
-                        });
-                    }else{
-                        TextView txtProxima = findViewById(R.id.txtProx);
-                        txtProxima.setVisibility(View.GONE);
-                    }
-                    if(anterior != null){
-                        TextView txtAnterior = findViewById(R.id.txtAnt);
-                        txtAnterior.setVisibility(View.VISIBLE);
-                        Rodada finalAnterior = anterior;
-                        txtAnterior.setOnClickListener(v -> {
-                            call(campeonato, String.valueOf(finalAnterior.getRodada()));
-                        });
-                    }else{
-                        TextView txtAnterior = findViewById(R.id.txtAnt);
-                        txtAnterior.setVisibility(View.GONE);
-                    }
-                    partidas.addAll(response.body().getPartidas());
-                    listRodadas.invalidateViews();
+                    dao.adicionar(response.body());
                 }else{
                     showMessage("Não foi possível obter a rodada, retorne mais tarde");
                 }

@@ -25,9 +25,9 @@ public class Conexao extends SQLiteOpenHelper {
                 "rodada_id integer," +
                 "edicao_id integer," +
                 "fase_atual_id integer," +
-                "CONSTRAINT fk_rodada FOREIGN KEY (rodada_id) REFERENCES rodada (rodada)," +
-                "CONSTRAINT fk_edicao FOREIGN KEY (edicao_id) REFERENCES edicao(edicao_id)," +
-                "CONSTRAINT fk_fase_atual FOREIGN KEY (fase_atual_id) REFERENCES fase_atual (fase_id))");
+                "FOREIGN KEY (rodada_id) REFERENCES rodada (rodada)," +
+                "FOREIGN KEY (edicao_id) REFERENCES edicao(edicao_id)," +
+                "FOREIGN KEY (fase_atual_id) REFERENCES fase_atual (fase_id))");
 
         db.execSQL("create table edicao(edicao_id integer primary key," +
                 "temporada varchar(50)," +
@@ -40,7 +40,9 @@ public class Conexao extends SQLiteOpenHelper {
                 "nome varchar(50))");
 
 
-        db.execSQL("create table tabela(posicao integer," +
+        db.execSQL("create table tabela(tabela_id integer," +
+                "posicao integer," +
+                "nome_popular varchar(50)," +
                 "pontos integer," +
                 "jogos integer," +
                 "vitorias integer," +
@@ -51,11 +53,24 @@ public class Conexao extends SQLiteOpenHelper {
                 "saldo_gols integer," +
                 "aproveitamento float," +
                 "variacar_posicao integer," +
-                "ultimos_jogos varchar(50)," +
-                "id_fase integer)");
+                "ultimos_jogos varchar(50))");
 
         db.execSQL("create table rodada(rodada integer primary key," +
-                "nome varchar(50))");
+                "nome varchar(50)," +
+                "rodada_anterior integer," +
+                "proxima_rodada integer," +
+                "partidas integer)");
+
+        db.execSQL("create table partidas(partida_id integer," +
+                "time_mandante varchar(50)," +
+                "time_visitante varchar(50)," +
+                "placar_mandante integer," +
+                "placar_visitante integer," +
+                "status varchar(50)," +
+                "data_realizacao varchar(50)," +
+                "hora_realizacao varchar(50)," +
+                "estadio varchar(50)," +
+                "rodada_id integer)");
 
     }
 

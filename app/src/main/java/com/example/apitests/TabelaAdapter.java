@@ -64,7 +64,10 @@ public class TabelaAdapter extends BaseAdapter {
         golContra.setText(String.valueOf(t.getGols_contra()));
         saldoGols.setText(String.valueOf(t.getSaldo_gols()));
         aproveitamento.setText(String.valueOf(t.getAproveitamento()));
-        recentes.setText(Arrays.toString(t.getUltimos_jogos()));
+        if(t.getV_ultimos_jogos() == null) {
+            t.setV_ultimos_jogos(Arrays.toString(t.getUltimos_jogos()));
+        }
+        recentes.setText(t.getV_ultimos_jogos());
 
 
         return view;
