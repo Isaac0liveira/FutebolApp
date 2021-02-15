@@ -3,14 +3,15 @@ package com.example.apitests;
 import java.util.List;
 
 public class FaseSemVolta {
-    private String fase_id;
+    private int fase_id;
     private List<Fase.Tabela> tabela;
     private List<FaseSemVolta.Chave> chaves;
+    private Campeonato campeonato;
     private Fase fase_anterior;
     private Fase proxima_fase;
     private boolean ida_e_volta;
 
-    public class Chave{
+    public static class Chave{
         private String nome;
         private Rodada.Partida partida_ida;
 
@@ -164,11 +165,11 @@ public class FaseSemVolta {
         }
     }
 
-    public String getFase_id() {
+    public int getFase_id() {
         return fase_id;
     }
 
-    public void setFase_id(String fase_id) {
+    public void setFase_id(int fase_id) {
         this.fase_id = fase_id;
     }
 
@@ -204,6 +205,13 @@ public class FaseSemVolta {
         this.proxima_fase = proxima_fase;
     }
 
+    public Campeonato getCampeonato() {
+        return campeonato;
+    }
+
+    public void setCampeonato(Campeonato campeonato) {
+        this.campeonato = campeonato;
+    }
 
     public boolean isIda_e_volta() {
         return ida_e_volta;

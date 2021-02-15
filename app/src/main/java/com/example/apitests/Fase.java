@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Fase implements Serializable {
-    private String fase_id;
+    private int fase_id;
     private List<Tabela> tabela;
     private List<Chave> chaves;
     private Campeonato campeonato;
@@ -12,7 +12,7 @@ public class Fase implements Serializable {
     private Fase proxima_fase;
     private boolean ida_e_volta;
 
-    public class Chave{
+    public static class Chave{
         private String nome;
         private Rodada.Partida partida_ida;
         private Rodada.Partida partida_volta;
@@ -183,11 +183,11 @@ public class Fase implements Serializable {
         }
     }
 
-    public String getFase_id() {
+    public int getFase_id() {
         return fase_id;
     }
 
-    public void setFase_id(String fase_id) {
+    public void setFase_id(int fase_id) {
         this.fase_id = fase_id;
     }
 

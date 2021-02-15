@@ -41,7 +41,6 @@ public class TabelaDAO {
     }
 
 
-
     public List<Fase.Tabela> obterTabela(String id){
         List<Fase.Tabela> tabela = new ArrayList<>();
         Cursor cursor = banco.query("tabela", new String[]{"tabela_id","posicao","nome_popular","pontos","jogos","vitorias","empates","derrotas","gols_pro","gols_contra","saldo_gols","aproveitamento","ultimos_jogos"},null,null,null,null,null);

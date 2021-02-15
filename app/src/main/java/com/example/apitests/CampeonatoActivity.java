@@ -6,8 +6,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -35,7 +37,6 @@ public class CampeonatoActivity extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        this.deleteDatabase("tabela");
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -67,36 +68,48 @@ public class CampeonatoActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Campeonato Não Disponível", Toast.LENGTH_SHORT).show();
             }
         });
-        init();
-        Toast.makeText(getApplicationContext(), "Carregando Campeonatos...", Toast.LENGTH_SHORT).show();
         new Handler().postDelayed(() -> {
             listView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
             listView.invalidateViews();
             listView.setVisibility(View.VISIBLE);
         }, 3000);
-
         swipeRefreshLayout = findViewById(R.id.swipeRodada);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             swipeRefreshLayout.setRefreshing(true);
             dao.atualizar();
             campeonatos.clear();
-            getCampeonatos();
+            init();
         });
+        init();
+    }
+
+    public class asyncInit extends AsyncTask<Void, Void, Void>{
+
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            runOnUiThread(() -> {
+                if (swipeRefreshLayout != null) {
+                    if (swipeRefreshLayout.isRefreshing()) {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                }
+                if (dao.obterLista().size() == 0) {
+                    getCampeonatos();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Carregando Campeonatos...", Toast.LENGTH_SHORT).show();
+                    campeonatos.addAll(dao.obterLista());
+                    listView.invalidateViews();
+                    listView.setVisibility(View.VISIBLE);
+                }
+            });
+            return null;
+        }
+
     }
 
     public void init() {
-        if(swipeRefreshLayout != null) {
-            if (swipeRefreshLayout.isRefreshing()) {
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        }
-        if(dao.obterLista().size() == 0){
-            getCampeonatos();
-        }else {
-            campeonatos.addAll(dao.obterLista());
-            listView.invalidateViews();
-            listView.setVisibility(View.VISIBLE);
-        }
+            new asyncInit().execute();
     }
 
     public void getCampeonatos() {
@@ -108,6 +121,7 @@ public class CampeonatoActivity extends AppCompatActivity {
                 if (response.code() == 200) {
                     List<Campeonato> campeonatoes = response.body();
                     getCampeonato(campeonatoes);
+                    init();
                 } else {
                     Toast.makeText(CampeonatoActivity.this, "Não foi possível obter a lista de campeonatos, retorne mais tarde", Toast.LENGTH_SHORT).show();
                 }
@@ -137,9 +151,9 @@ public class CampeonatoActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<Campeonato> call, Throwable t) { }
+                public void onFailure(Call<Campeonato> call, Throwable t) {
+                }
             });
         }
-        new Handler().postDelayed(this::init, 1000);
     }
 }

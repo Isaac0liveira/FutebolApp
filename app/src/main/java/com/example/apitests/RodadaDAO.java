@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,36 +29,42 @@ public class RodadaDAO {
         values.put("partidas", rodada.getRodada());
         for(Rodada.Partida p: rodada.getPartidas()){
             ContentValues valuesPartida = new ContentValues();
-            values.put("partida_id", p.getPartida_id());
-            values.put("time_mandante", p.getTime_mandante().getNome_popular());
-            values.put("time_visitante", p.getTime_visitante().getNome_popular());
-            values.put("placar_mandante", p.getPlacar_mandante());
-            values.put("placar_visitante", p.getPlacar_visitante());
-            values.put("status", p.getStatus());
-            values.put("data_realizacao", p.getData_realizacao());
-            values.put("hora_realizacao", p.getHora_realizacao());
-            values.put("estadio", p.getEstadio().getNome_popular());
-            values.put("rodada_id", rodada.getRodada());
+            valuesPartida.put("partida_id", p.getPartida_id());
+            valuesPartida.put("time_mandante", p.getTime_mandante().getNome_popular());
+            valuesPartida.put("time_visitante", p.getTime_visitante().getNome_popular());
+            valuesPartida.put("placar_mandante", p.getPlacar_mandante());
+            valuesPartida.put("placar_visitante", p.getPlacar_visitante());
+            valuesPartida.put("status", p.getStatus());
+            valuesPartida.put("data_realizacao", p.getData_realizacao());
+            valuesPartida.put("hora_realizacao", p.getHora_realizacao());
+            valuesPartida.put("estadio", p.getEstadio().getNome_popular());
+            valuesPartida.put("rodada_id", rodada.getRodada());
+            Log.d("Rodada", rodada.getRodada() + "");
             banco.insert("partidas", null, valuesPartida);
         }
         banco.insert("rodada", null, values);
     }
 
-    public Rodada obterRodada(String id){
+    public List<Rodada> obterRodada(String id){
+        List<Rodada> retorno = new ArrayList<>();
         Rodada rodada = new Rodada();
         Cursor cursor = banco.rawQuery("select * from rodada where rodada = " + id, null);
         while (cursor.moveToNext()){
-            rodada.setRodada(cursor.getInt(0));
-            rodada.setNome(cursor.getString(1));
+            rodada.setRodada(cursor.getInt(1));
+            rodada.setNome(cursor.getString(2));
             Rodada anterior = new Rodada();
-            anterior.setRodada(Integer.parseInt(cursor.getString(2)));
+            anterior.setRodada(cursor.getInt(3));
             rodada.setRodada_anterior(anterior);
             Rodada proxima = new Rodada();
-            proxima.setRodada(cursor.getInt(3));
+            proxima.setRodada(cursor.getInt(4));
             rodada.setProxima_rodada(proxima);
             rodada.setPartidas(obterPartidas(id));
         }
-        return rodada;
+        if(rodada.getNome() == null){
+            return null;
+        }
+        retorno.add(rodada);
+        return retorno;
     }
 
     public List<Rodada.Partida> obterPartidas(String id){
@@ -85,15 +92,8 @@ public class RodadaDAO {
         return partidas;
     }
 
-    public void atualizarRodada(){
+    public void atualizarRodada(String rodada){
         banco.beginTransaction();
-        banco.delete("rodada", null,null);
-        banco.execSQL("drop table rodada");
-        banco.execSQL("create table rodada(rodada integer primary key," +
-                "nome varchar(50)," +
-                "rodada_anterior integer," +
-                "proxima_rodada integer," +
-                "partidas integer)");
         banco.setTransactionSuccessful();
         banco.endTransaction();
     }
@@ -102,7 +102,8 @@ public class RodadaDAO {
         banco.beginTransaction();
         banco.delete("partidas", null,null);
         banco.execSQL("drop table partidas");
-        banco.execSQL("create table partidas(partida_id integer," +
+        banco.execSQL("create table partidas(id integer primary key autoincrement," +
+                "partida_id integer," +
                 "time_mandante varchar(50)," +
                 "time_visitante varchar(50)," +
                 "placar_mandante integer," +

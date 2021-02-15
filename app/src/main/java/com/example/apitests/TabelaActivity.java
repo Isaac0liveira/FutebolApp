@@ -79,6 +79,7 @@ public class TabelaActivity extends AppCompatActivity {
         init();
     }
 
+
     public void init(){
         if(swipeRefreshLayout != null) {
             if (swipeRefreshLayout.isRefreshing()) {

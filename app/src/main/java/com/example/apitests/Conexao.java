@@ -25,7 +25,7 @@ public class Conexao extends SQLiteOpenHelper {
                 "rodada_id integer," +
                 "edicao_id integer," +
                 "fase_atual_id integer," +
-                "FOREIGN KEY (rodada_id) REFERENCES rodada (rodada)," +
+                "FOREIGN KEY (rodada_id) REFERENCES rodada (id)," +
                 "FOREIGN KEY (edicao_id) REFERENCES edicao(edicao_id)," +
                 "FOREIGN KEY (fase_atual_id) REFERENCES fase_atual (fase_id))");
 
@@ -55,13 +55,15 @@ public class Conexao extends SQLiteOpenHelper {
                 "variacar_posicao integer," +
                 "ultimos_jogos varchar(50))");
 
-        db.execSQL("create table rodada(rodada integer primary key," +
+        db.execSQL("create table rodada(id integer primary key autoincrement," +
+                "rodada integer," +
                 "nome varchar(50)," +
                 "rodada_anterior integer," +
                 "proxima_rodada integer," +
                 "partidas integer)");
 
-        db.execSQL("create table partidas(partida_id integer," +
+        db.execSQL("create table partidas(id primary key, " +
+                "partida_id integer," +
                 "time_mandante varchar(50)," +
                 "time_visitante varchar(50)," +
                 "placar_mandante integer," +
@@ -71,6 +73,21 @@ public class Conexao extends SQLiteOpenHelper {
                 "hora_realizacao varchar(50)," +
                 "estadio varchar(50)," +
                 "rodada_id integer)");
+
+
+
+        db.execSQL("create table fase (id integer primary key autoincrement, " +
+                "fase_id integer," +
+                "campeonato integer," +
+                "fase_anterior integer," +
+                "proxima_fase integer," +
+                "ida_e_volta bool)");
+
+        db.execSQL("create table chave (campeonato_id integer," +
+                "fase_id integer," +
+                "nome varchar(50)," +
+                "partida_ida integer," +
+                "partida_volta integer)");
 
     }
 
