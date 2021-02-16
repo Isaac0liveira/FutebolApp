@@ -8,13 +8,11 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -28,7 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CampeonatoActivity extends AppCompatActivity {
     CampeonatoDAO dao;
-    List<Campeonato> campeonatos = new ArrayList<>();
+    ArrayList<Campeonato> campeonatos = new ArrayList<>();
     SwipeRefreshLayout swipeRefreshLayout;
     Api api;
     ListView listView;
@@ -40,6 +38,12 @@ public class CampeonatoActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(savedInstanceState != null){
+            campeonatos = savedInstanceState.getParcelableArrayList("campeonatos");
+        }else{
+            Toast.makeText(getApplicationContext(), "Carregando Campeonatos...", Toast.LENGTH_SHORT).show();
+        }
 
         Retrofit retrofit = new Retrofit.Builder().baseUrl(Api.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
@@ -68,12 +72,7 @@ public class CampeonatoActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Campeonato Não Disponível", Toast.LENGTH_SHORT).show();
             }
         });
-        new Handler().postDelayed(() -> {
-            listView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
-            listView.invalidateViews();
-            listView.setVisibility(View.VISIBLE);
-        }, 3000);
-        swipeRefreshLayout = findViewById(R.id.swipeRodada);
+        swipeRefreshLayout = findViewById(R.id.swipeCamp);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             swipeRefreshLayout.setRefreshing(true);
             dao.atualizar();
@@ -83,7 +82,7 @@ public class CampeonatoActivity extends AppCompatActivity {
         init();
     }
 
-    public class asyncInit extends AsyncTask<Void, Void, Void>{
+    public class asyncInit extends AsyncTask<Void, Void, Void> {
 
 
         @Override
@@ -97,10 +96,14 @@ public class CampeonatoActivity extends AppCompatActivity {
                 if (dao.obterLista().size() == 0) {
                     getCampeonatos();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Carregando Campeonatos...", Toast.LENGTH_SHORT).show();
-                    campeonatos.addAll(dao.obterLista());
-                    listView.invalidateViews();
-                    listView.setVisibility(View.VISIBLE);
+                    new Thread(() -> {
+                        runOnUiThread(() -> {
+                            campeonatos.addAll(dao.obterLista());
+                            listView.startAnimation(AnimationUtils.loadAnimation(CampeonatoActivity.this, android.R.anim.fade_in));
+                            listView.invalidateViews();
+                            listView.setVisibility(View.VISIBLE);
+                        });
+                    }).start();
                 }
             });
             return null;
@@ -109,7 +112,7 @@ public class CampeonatoActivity extends AppCompatActivity {
     }
 
     public void init() {
-            new asyncInit().execute();
+        new asyncInit().execute();
     }
 
     public void getCampeonatos() {
@@ -155,5 +158,15 @@ public class CampeonatoActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        savedInstanceState.putParcelableArrayList("campeonatos", campeonatos);
+        // etc.
     }
 }

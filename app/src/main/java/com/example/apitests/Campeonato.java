@@ -1,8 +1,11 @@
 package com.example.apitests;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 
-public class Campeonato implements Serializable {
+public class Campeonato implements Serializable, Parcelable {
     private int campeonato_id;
     private String nome;
     private String slug;
@@ -13,6 +16,18 @@ public class Campeonato implements Serializable {
     private String logo;
     private String tipo;
     private boolean plano;
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringArray(new String[] {String.valueOf(this.campeonato_id),
+                this.nome,
+                this.tipo});
+    }
 
     public static class Rodada{
         private int rodada;

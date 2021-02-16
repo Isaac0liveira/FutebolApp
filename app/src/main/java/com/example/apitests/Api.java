@@ -16,7 +16,7 @@ import retrofit2.http.Path;
 public interface Api {
 
     String BASE_URL = "https://api.api-futebol.com.br/v1/";
-    String Auth = "live_e1bf586a19dab0359e94cd3af1b399"; //Coloque a API Key aqui
+    String Auth = "live_c7f1295c3a6ea53478d8e2cb00d31f"; //Coloque a API Key aqui
     //live_32731f223b23e3d6d70558a3e47a6f
     @Headers({"Authorization: Bearer " + Auth})
     @GET("campeonatos")

@@ -56,7 +56,7 @@ public class FaseAdapter extends BaseAdapter {
         TextView golVisitanteVolta = v.findViewById(R.id.golVisitanteVolta);
 
 
-        TextView txtStatus = v.findViewById(R.id.txtStatusIda);
+        TextView txtStatus = v.findViewById(R.id.txtStatusIr);
         TextView txtData = v.findViewById(R.id.txtDataIda);
         TextView txtEstadio = v.findViewById(R.id.txtEstadioIda);
         TextView txtHora = v.findViewById(R.id.txtHoraIda);
@@ -80,7 +80,7 @@ public class FaseAdapter extends BaseAdapter {
             txtStatus.setTextColor(Color.BLUE);
         }else{
             txtStatus.setText("Agendado");
-            txtStatus.setTextColor(Color.green(10));
+            txtStatus.setTextColor(Color.GREEN);
         }
         txtData.setText(partidaIda.getData_realizacao());
         txtHora.setText(partidaIda.getHora_realizacao());

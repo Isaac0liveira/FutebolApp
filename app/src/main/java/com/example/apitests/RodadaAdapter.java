@@ -46,6 +46,7 @@ public class RodadaAdapter extends BaseAdapter {
         TextView txtStatus = v.findViewById(R.id.txtStatus);
         TextView txtData = v.findViewById(R.id.txtData);
         TextView txtHora = v.findViewById(R.id.txtHora);
+        TextView estadio = v.findViewById(R.id.estadioRodada);
 
         Rodada.Partida partida = partidas.get(position);
 
@@ -62,6 +63,7 @@ public class RodadaAdapter extends BaseAdapter {
         }
         txtData.setText(partida.getData_realizacao());
         txtHora.setText(partida.getHora_realizacao());
+        estadio.setText(partida.getEstadio().getNome_popular());
 
         return v;
     }

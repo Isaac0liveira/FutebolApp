@@ -56,7 +56,7 @@ public class FaseSemVoltaAdapter extends BaseAdapter {
         TextView golVisitanteVolta = v.findViewById(R.id.golVisitanteVolta);
 
 
-        TextView txtStatus = v.findViewById(R.id.txtStatusIda);
+        TextView txtStatus = v.findViewById(R.id.txtStatusIr);
         TextView txtData = v.findViewById(R.id.txtDataIda);
         TextView txtEstadio = v.findViewById(R.id.txtEstadioIda);
         TextView txtHora = v.findViewById(R.id.txtHoraIda);

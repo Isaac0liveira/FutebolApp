@@ -15,19 +15,23 @@ public class RodadaDAO {
     private SQLiteDatabase banco;
     private Conexao conexao;
 
-    public RodadaDAO(Context context){
+    public RodadaDAO(Context context) {
         conexao = new Conexao(context);
         banco = conexao.getWritableDatabase();
     }
 
-    public void adicionar(Rodada rodada){
+    public void adicionar(Rodada rodada) {
         ContentValues values = new ContentValues();
         values.put("rodada", rodada.getRodada());
         values.put("nome", rodada.getNome());
-        values.put("rodada_anterior", rodada.getRodada_anterior().getRodada());
-        values.put("proxima_rodada", rodada.getProxima_rodada().getRodada());
+        if(rodada.getRodada_anterior() != null) {
+            values.put("rodada_anterior", rodada.getRodada_anterior().getRodada());
+        }
+        if(rodada.getProxima_rodada() != null) {
+            values.put("proxima_rodada", rodada.getProxima_rodada().getRodada());
+        }
         values.put("partidas", rodada.getRodada());
-        for(Rodada.Partida p: rodada.getPartidas()){
+        for (Rodada.Partida p : rodada.getPartidas()) {
             ContentValues valuesPartida = new ContentValues();
             valuesPartida.put("partida_id", p.getPartida_id());
             valuesPartida.put("time_mandante", p.getTime_mandante().getNome_popular());
@@ -45,62 +49,66 @@ public class RodadaDAO {
         banco.insert("rodada", null, values);
     }
 
-    public List<Rodada> obterRodada(String id){
+    public List<Rodada> obterRodada(String id) {
         List<Rodada> retorno = new ArrayList<>();
         Rodada rodada = new Rodada();
         Cursor cursor = banco.rawQuery("select * from rodada where rodada = " + id, null);
-        while (cursor.moveToNext()){
+        while (cursor.moveToNext()) {
             rodada.setRodada(cursor.getInt(1));
             rodada.setNome(cursor.getString(2));
             Rodada anterior = new Rodada();
             anterior.setRodada(cursor.getInt(3));
-            rodada.setRodada_anterior(anterior);
             Rodada proxima = new Rodada();
             proxima.setRodada(cursor.getInt(4));
-            rodada.setProxima_rodada(proxima);
+            if (proxima.getRodada() != 0) {
+                rodada.setProxima_rodada(proxima);
+            }
+            if (anterior.getRodada() != 0) {
+                rodada.setRodada_anterior(anterior);
+            }
             rodada.setPartidas(obterPartidas(id));
         }
-        if(rodada.getNome() == null){
+        if (rodada.getNome() == null) {
             return null;
         }
         retorno.add(rodada);
         return retorno;
     }
 
-    public List<Rodada.Partida> obterPartidas(String id){
+    public List<Rodada.Partida> obterPartidas(String id) {
         List<Rodada.Partida> partidas = new ArrayList<>();
         Cursor cursor = banco.rawQuery("select * from partidas where rodada_id = " + id, null);
-        while (cursor.moveToNext()){
+        while (cursor.moveToNext()) {
             Rodada.Partida partida = new Rodada.Partida();
-            partida.setPartida_id(cursor.getInt(0));
+            partida.setPartida_id(cursor.getInt(1));
             Rodada.Partida.Time mandante = new Rodada.Partida.Time();
-            mandante.setNome_popular(cursor.getString(1));
+            mandante.setNome_popular(cursor.getString(2));
             partida.setTime_mandante(mandante);
             Rodada.Partida.Time visitante = new Rodada.Partida.Time();
-            visitante.setNome_popular(cursor.getString(2));
+            visitante.setNome_popular(cursor.getString(3));
             partida.setTime_visitante(visitante);
-            partida.setPlacar_mandante(cursor.getInt(3));
-            partida.setPlacar_visitante(cursor.getInt(4));
-            partida.setStatus(cursor.getString(5));
-            partida.setData_realizacao(cursor.getString(6));
-            partida.setHora_realizacao(cursor.getString(7));
+            partida.setPlacar_mandante(cursor.getInt(4));
+            partida.setPlacar_visitante(cursor.getInt(5));
+            partida.setStatus(cursor.getString(6));
+            partida.setData_realizacao(cursor.getString(7));
+            partida.setHora_realizacao(cursor.getString(8));
             Rodada.Partida.Estadio estadio = new Rodada.Partida.Estadio();
-            estadio.setNome_popular(cursor.getString(8));
+            estadio.setNome_popular(cursor.getString(9));
             partida.setEstadio(estadio);
             partidas.add(partida);
         }
         return partidas;
     }
 
-    public void atualizarRodada(String rodada){
+    public void atualizarRodada(String rodada) {
         banco.beginTransaction();
         banco.setTransactionSuccessful();
         banco.endTransaction();
     }
 
-    public void atualizarPartida(){
+    public void atualizarPartida() {
         banco.beginTransaction();
-        banco.delete("partidas", null,null);
+        banco.delete("partidas", null, null);
         banco.execSQL("drop table partidas");
         banco.execSQL("create table partidas(id integer primary key autoincrement," +
                 "partida_id integer," +

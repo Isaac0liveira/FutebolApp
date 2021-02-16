@@ -62,7 +62,7 @@ public class Conexao extends SQLiteOpenHelper {
                 "proxima_rodada integer," +
                 "partidas integer)");
 
-        db.execSQL("create table partidas(id primary key, " +
+        db.execSQL("create table partidas(id integer primary key autoincrement, " +
                 "partida_id integer," +
                 "time_mandante varchar(50)," +
                 "time_visitante varchar(50)," +
@@ -73,8 +73,6 @@ public class Conexao extends SQLiteOpenHelper {
                 "hora_realizacao varchar(50)," +
                 "estadio varchar(50)," +
                 "rodada_id integer)");
-
-
 
         db.execSQL("create table fase (id integer primary key autoincrement, " +
                 "fase_id integer," +

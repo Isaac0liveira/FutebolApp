@@ -2,10 +2,12 @@ package com.example.apitests;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +16,12 @@ public class CampeonatoDAO {
 
     private SQLiteDatabase banco;
     private Conexao conexao;
+    private Context context;
 
     public CampeonatoDAO(Context context){
         conexao = new Conexao(context);
         banco = conexao.getWritableDatabase();
+        this.context = context;
     }
 
     public List<Campeonato> obterLista(){
@@ -117,45 +121,15 @@ public class CampeonatoDAO {
     }
 
     public void atualizar(){
+        Intent intent = new Intent(context, CampeonatoActivity.class);
+        context.startActivity(intent);
+        Toast.makeText(context, "Atualizando dados...", Toast.LENGTH_SHORT).show();
         banco.beginTransaction();
-        banco.execSQL("drop table rodada");
-        banco.execSQL("drop table campeonato");
-        banco.execSQL("create table rodada(id integer primary key autoincrement," +
-                "rodada integer," +
-                "nome varchar(50)," +
-                "rodada_anterior integer," +
-                "proxima_rodada integer," +
-                "partidas integer)");
-        banco.execSQL("create table campeonato(campeonato_id integer primary key," +
-                "nome varchar(50)," +
-                "slug varchar(50)," +
-                "nome_popular varchar(50)," +
-                "logo varchar(500)," +
-                "tipo varchar(50)," +
-                "plano integer," +
-                "rodada_id integer," +
-                "edicao_id integer," +
-                "fase_atual_id integer," +
-                "FOREIGN KEY (rodada_id) REFERENCES rodada (id)," +
-                "FOREIGN KEY (edicao_id) REFERENCES edicao(edicao_id)," +
-                "FOREIGN KEY (fase_atual_id) REFERENCES fase_atual (fase_id))");
-        banco.delete("campeonato", null, null);
-        banco.delete("rodada", null, null);
-        banco.delete("edicao", null, null);
-        banco.delete("fase_atual", null, null);
+        context.deleteDatabase("campeonato.db");
+        new Handler().postDelayed(() -> new Conexao(context), 500);
         banco.setTransactionSuccessful();
         banco.endTransaction();
         Log.d("size", String.valueOf(this.obterLista().size()));
     }
 
-/*
-    public void votar(Candidato candidato){
-        ContentValues values = new ContentValues();
-        values.put("votos", candidato.getVotos() + 1);
-        banco.update("candidatos", values, "id = ?", new String[]{String.valueOf(candidato.getId())});
-    }
-
-    public void excluir(Candidato candidato){
-        banco.delete("candidatos", "id = ?", new String[]{String.valueOf(candidato.getId())});
-    }*/
 }

@@ -6,6 +6,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -39,6 +40,7 @@ public class TabelaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tabela);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         retrofit = new Retrofit.Builder().baseUrl(Api.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
         api = retrofit.create(Api.class);
@@ -59,24 +61,26 @@ public class TabelaActivity extends AppCompatActivity {
                newIntent.putExtra("campeonato", id);
                newIntent.putExtra("rodada", rodada);
                newIntent.putExtra("nome", nome);
+               newIntent.putExtra("fase", fase);
                startActivity(newIntent);
            }
         });
         TabelaAdapter adapter = new TabelaAdapter(this, tabela);
         gridView.setAdapter(adapter);
-        swipeRefreshLayout = findViewById(R.id.swipeRodada);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            gridView.setVisibility(View.INVISIBLE);
-            progressBar.setVisibility(View.VISIBLE);
-            swipeRefreshLayout.setRefreshing(true);
-            dao.atualizar();
-            tabela.clear();
-            getTabela();
-        });
-
+        swipeRefreshLayout = findViewById(R.id.swipeTabela);
+        swipeRefreshLayout.setOnRefreshListener(() -> new CampeonatoDAO(TabelaActivity.this).atualizar());
         this.setTitle(nome);
         getSupportActionBar().setSubtitle("Tabela");
         init();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case android.R.id.home:
+                this.finish();
+        }
+        return (super.onOptionsItemSelected(menuItem));
     }
 
 

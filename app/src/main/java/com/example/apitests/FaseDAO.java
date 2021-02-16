@@ -39,18 +39,19 @@ public class FaseDAO {
             valuesPartidaIda.put("hora_realizacao", c.getPartida_ida().getHora_realizacao());
             valuesPartidaIda.put("estadio", c.getPartida_ida().getEstadio().getNome_popular());
             valuesChaves.put("partida_ida", banco.insert("partidas", null, valuesPartidaIda));
-
-            ContentValues valuesPartidaVolta = new ContentValues();
-            valuesPartidaVolta.put("partida_id", c.getPartida_volta().getPartida_id());
-            valuesPartidaVolta.put("time_mandante", c.getPartida_volta().getTime_mandante().getNome_popular());
-            valuesPartidaVolta.put("time_visitante", c.getPartida_volta().getTime_visitante().getNome_popular());
-            valuesPartidaVolta.put("placar_mandante", c.getPartida_volta().getPlacar_mandante());
-            valuesPartidaVolta.put("placar_visitante", c.getPartida_volta().getPlacar_visitante());
-            valuesPartidaVolta.put("status", c.getPartida_volta().getStatus());
-            valuesPartidaVolta.put("data_realizacao", c.getPartida_volta().getData_realizacao());
-            valuesPartidaVolta.put("hora_realizacao", c.getPartida_volta().getHora_realizacao());
-            valuesPartidaVolta.put("estadio", c.getPartida_volta().getEstadio().getNome_popular());
-            valuesChaves.put("partida_volta", banco.insert("partidas", null, valuesPartidaVolta));
+            if(c.getPartida_volta() != null) {
+                ContentValues valuesPartidaVolta = new ContentValues();
+                valuesPartidaVolta.put("partida_id", c.getPartida_volta().getPartida_id());
+                valuesPartidaVolta.put("time_mandante", c.getPartida_volta().getTime_mandante().getNome_popular());
+                valuesPartidaVolta.put("time_visitante", c.getPartida_volta().getTime_visitante().getNome_popular());
+                valuesPartidaVolta.put("placar_mandante", c.getPartida_volta().getPlacar_mandante());
+                valuesPartidaVolta.put("placar_visitante", c.getPartida_volta().getPlacar_visitante());
+                valuesPartidaVolta.put("status", c.getPartida_volta().getStatus());
+                valuesPartidaVolta.put("data_realizacao", c.getPartida_volta().getData_realizacao());
+                valuesPartidaVolta.put("hora_realizacao", c.getPartida_volta().getHora_realizacao());
+                valuesPartidaVolta.put("estadio", c.getPartida_volta().getEstadio().getNome_popular());
+                valuesChaves.put("partida_volta", banco.insert("partidas", null, valuesPartidaVolta));
+            }
             banco.insert("chave", null, valuesChaves);
         }
         values.put("campeonato", fase.getCampeonato().getCampeonato_id());
@@ -116,7 +117,7 @@ public class FaseDAO {
             List<Fase.Chave> chaves = new ArrayList<>();
             while(cursorChave.moveToNext()){
                 Fase.Chave chave = new Fase.Chave();
-                chave.setNome(cursor.getString(2));
+                chave.setNome(cursorChave.getString(2));
                 chave.setPartida_ida(obterPartida(String.valueOf(cursorChave.getInt(3))));
                 chave.setPartida_volta(obterPartida(String.valueOf(cursorChave.getInt(4))));
                 chaves.add(chave);
@@ -128,6 +129,7 @@ public class FaseDAO {
             fase.setFase_anterior(faseAnterior);
             Fase proximaFase = new Fase();
             proximaFase.setFase_id(cursor.getInt(4));
+            fase.setProxima_fase(proximaFase);
             if(cursor.getInt(5) == 0) {
                 fase.setIda_e_volta(false);
             }else{
@@ -178,6 +180,10 @@ public class FaseDAO {
             fase.setIda_e_volta(false);
         }
         cursor.close();
+        if(fase.getCampeonato() == null) {
+            retorno.add(fase);
+            return retorno;
+        }
         if(fase.getCampeonato().getNome() == null){
             return null;
         }
@@ -189,20 +195,20 @@ public class FaseDAO {
         Rodada.Partida partida = new Rodada.Partida();
         Cursor cursor = banco.rawQuery("select * from partidas where id = " + id, null);
         while (cursor.moveToNext()){
-            partida.setPartida_id(cursor.getInt(0));
+            partida.setPartida_id(cursor.getInt(1));
             Rodada.Partida.Time mandante = new Rodada.Partida.Time();
-            mandante.setNome_popular(cursor.getString(1));
+            mandante.setNome_popular(cursor.getString(2));
             partida.setTime_mandante(mandante);
             Rodada.Partida.Time visitante = new Rodada.Partida.Time();
-            visitante.setNome_popular(cursor.getString(2));
+            visitante.setNome_popular(cursor.getString(3));
             partida.setTime_visitante(visitante);
-            partida.setPlacar_mandante(cursor.getInt(3));
-            partida.setPlacar_visitante(cursor.getInt(4));
-            partida.setStatus(cursor.getString(5));
-            partida.setData_realizacao(cursor.getString(6));
-            partida.setHora_realizacao(cursor.getString(7));
+            partida.setPlacar_mandante(cursor.getInt(4));
+            partida.setPlacar_visitante(cursor.getInt(5));
+            partida.setStatus(cursor.getString(6));
+            partida.setData_realizacao(cursor.getString(7));
+            partida.setHora_realizacao(cursor.getString(8));
             Rodada.Partida.Estadio estadio = new Rodada.Partida.Estadio();
-            estadio.setNome_popular(cursor.getString(8));
+            estadio.setNome_popular(cursor.getString(9));
             partida.setEstadio(estadio);
         }
         cursor.close();
@@ -259,21 +265,5 @@ public class FaseDAO {
     }
 
     public void atualizar(){
-        banco.beginTransaction();
-        banco.execSQL("create table fase(id integer primary key autoincrement, " +
-                "fase_id integer," +
-                "campeonato integer," +
-                "fase_anterior integer," +
-                "proxima_fase integer," +
-                "ida_e_volta bool)");
-        banco.execSQL("create table chave(campeonato_id integer," +
-                "fase_id integer," +
-                "nome varchar(50)," +
-                "partida_ida integer," +
-                "partida_volta integer)");
-        banco.delete("fase", null, null);
-        banco.delete("chave", null, null);
-        banco.setTransactionSuccessful();
-        banco.endTransaction();
     }
 }
