@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +42,7 @@ public class RodadaActivity extends AppCompatActivity {
     String fase;
     TextView rodadaAtual;
     SwipeRefreshLayout swipeRefreshLayout;
+    ProgressBar progressBar;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -55,6 +57,10 @@ public class RodadaActivity extends AppCompatActivity {
         listRodadas = findViewById(R.id.listRodadas);
         adapter = new RodadaAdapter(this, partidas);
         listRodadas.setAdapter(adapter);
+        listRodadas.setVisibility(View.INVISIBLE);
+        progressBar = findViewById(R.id.progressBar4);
+        progressBar.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_in));
+        progressBar.setVisibility(View.VISIBLE);
         Intent intent = getIntent();
         campeonato = (String) intent.getSerializableExtra("campeonato");
         rodada = (String) intent.getSerializableExtra("rodada");
@@ -85,10 +91,13 @@ public class RodadaActivity extends AppCompatActivity {
             call(campeonato, rodadaID);
         }else {
             if (dao.obterRodada(rodadaID).size() != 0 && dao.obterRodada(rodadaID).get(0).getPartidas().size() != 0) {
+                rodada = rodadaID;
                 copiaRodada = dao.obterRodada(rodadaID).get(0);
                 if (copiaRodada.getPartidas() != null) {
                     partidas.addAll(copiaRodada.getPartidas());
                 }
+                progressBar.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_out));
+                progressBar.setVisibility(View.GONE);
                 listRodadas.invalidateViews();
                 new Handler().postDelayed(() -> {
                     listRodadas.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_in));
@@ -109,6 +118,8 @@ public class RodadaActivity extends AppCompatActivity {
                             getSupportActionBar().setSubtitle("");
                             new Handler().postDelayed(() -> {
                                 partidas.clear();
+                                progressBar.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_in));
+                                progressBar.setVisibility(View.VISIBLE);
                                 init(String.valueOf(copiaRodada.getRodada_anterior().getRodada()));
                                 rodadaAtual.setText("Rodada " + copiaRodada.getRodada_anterior().getRodada());
                             }, 500);
@@ -126,6 +137,8 @@ public class RodadaActivity extends AppCompatActivity {
                             getSupportActionBar().setSubtitle("");
                             new Handler().postDelayed(() -> {
                                 partidas.clear();
+                                progressBar.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_in));
+                                progressBar.setVisibility(View.VISIBLE);
                                 init(String.valueOf(copiaRodada.getProxima_rodada().getRodada()));
                                 rodadaAtual.setText("Rodada " + copiaRodada.getProxima_rodada().getRodada());
                             }, 500);
@@ -154,6 +167,11 @@ public class RodadaActivity extends AppCompatActivity {
                     init(novaRodada);
                 }else{
                     showMessage("Não foi possível obter a rodada, retorne mais tarde");
+                    if(rodada == novaRodada){
+                        finish();
+                    }else {
+                        init(rodada);
+                    }
                 }
             }
 

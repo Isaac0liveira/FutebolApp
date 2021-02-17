@@ -109,6 +109,7 @@ public class TabelaActivity extends AppCompatActivity {
                     dao.adicionar(response.body());
                 }else{
                     Toast.makeText(TabelaActivity.this, "Não foi possível obter a tabela, retorne mais tarde", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
                 init();
             }

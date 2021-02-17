@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,9 +36,11 @@ public class FaseActivity extends AppCompatActivity {
     FaseDAO dao;
     String campeonato;
     SwipeRefreshLayout swipeRefreshLayout;
+    ProgressBar progressBar;
     List<Fase.Chave> chaves = new ArrayList<Fase.Chave>();
     List<FaseSemVolta.Chave> chavesSemVolta = new ArrayList<>();
     FaseAdapter adapter;
+    String fase;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,19 +51,21 @@ public class FaseActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create()).build();
         api = retrofit.create(Api.class);
         dao = new FaseDAO(this);
+        progressBar = findViewById(R.id.progressBar3);
         listChaves = findViewById(R.id.list_chaves);
         listChaves.setVisibility(View.INVISIBLE);
+        progressBar.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_in));
+        progressBar.setVisibility(View.VISIBLE);
         adapter = new FaseAdapter(this, chaves);
         listChaves.setAdapter(adapter);
         Intent intent = getIntent();
         campeonato = (String) intent.getSerializableExtra("campeonato");
-        String fase = (String) intent.getSerializableExtra("fase");
+        fase = (String) intent.getSerializableExtra("fase");
         String nome = (String) intent.getSerializableExtra("nome");
         faseAtual = findViewById(R.id.fase_atual);
         swipeRefreshLayout = findViewById(R.id.swipeFase);
         swipeRefreshLayout.setOnRefreshListener(() -> new CampeonatoDAO(FaseActivity.this).atualizar());
         this.setTitle(nome);
-
         init(fase);
     }
 
@@ -81,14 +86,17 @@ public class FaseActivity extends AppCompatActivity {
             call(campeonato, faseID);
         }else if(dao.obterFase(faseID).get(0).getFase_id() == -1){
             if(dao.obterFaseSemVolta(faseID).size() != 0 && dao.obterFaseSemVolta(faseID).get(0).getChaves().size() != 0){
+                fase = faseID;
                 chaves.clear();
                 FaseSemVolta copiaFase = dao.obterFaseSemVolta(faseID).get(0);
                 if(copiaFase.getChaves() != null){
                     chavesSemVolta.addAll(copiaFase.getChaves());
                 }
                 Collections.sort(chavesSemVolta, new sortChaveSemVolta());
-                listChaves.invalidateViews();
+                progressBar.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                progressBar.setVisibility(View.GONE);
                 faseAtual.setText("Fase " + faseID);
+                listChaves.invalidateViews();
                 new Handler().postDelayed(() -> {
                     listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_in));
                     faseAtual.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_in));
@@ -107,6 +115,8 @@ public class FaseActivity extends AppCompatActivity {
                             faseAtual.setVisibility(View.INVISIBLE);
                             getSupportActionBar().setSubtitle("");
                             new Handler().postDelayed(() -> {
+                                progressBar.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_in));
+                                progressBar.setVisibility(View.VISIBLE);
                                 init(String.valueOf(copiaFase.getFase_anterior().getFase_id()));
                             },500);
                         }
@@ -121,6 +131,8 @@ public class FaseActivity extends AppCompatActivity {
                             faseAtual.setVisibility(View.INVISIBLE);
                             getSupportActionBar().setSubtitle("");
                             new Handler().postDelayed(() -> {
+                                progressBar.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_in));
+                                progressBar.setVisibility(View.VISIBLE);
                                 init(String.valueOf(copiaFase.getProxima_fase().getFase_id()));
                             },500);
                         }
@@ -135,6 +147,7 @@ public class FaseActivity extends AppCompatActivity {
 
 
             if(dao.obterFase(faseID).size() != 0 && dao.obterFase(faseID).get(0).getChaves().size() != 0){
+                fase = faseID;
                 chaves.clear();
                 Fase copiaFase = dao.obterFase(faseID).get(0);
                 if(copiaFase.getChaves() != null){
@@ -143,6 +156,8 @@ public class FaseActivity extends AppCompatActivity {
                     chaves.addAll(copiaChaves);
                 }
                 listChaves.invalidateViews();
+                progressBar.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                progressBar.setVisibility(View.GONE);
                 faseAtual.setText("Fase " + faseID);
                 new Handler().postDelayed(() -> {
                     listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_in));
@@ -156,28 +171,36 @@ public class FaseActivity extends AppCompatActivity {
                     @Override
                     public void onSwipeRight() {
                         if (copiaFase.getFase_anterior() != null) {
-                            listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
-                            faseAtual.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
-                            listChaves.setVisibility(View.INVISIBLE);
-                            faseAtual.setVisibility(View.INVISIBLE);
-                            getSupportActionBar().setSubtitle("");
-                            new Handler().postDelayed(() -> {
-                                init(String.valueOf(copiaFase.getFase_anterior().getFase_id()));
-                            },500);
+                            if(copiaFase.getFase_anterior().getFase_id() != 0) {
+                                listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                faseAtual.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                listChaves.setVisibility(View.INVISIBLE);
+                                faseAtual.setVisibility(View.INVISIBLE);
+                                getSupportActionBar().setSubtitle("");
+                                new Handler().postDelayed(() -> {
+                                    progressBar.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_in));
+                                    progressBar.setVisibility(View.VISIBLE);
+                                    init(String.valueOf(copiaFase.getFase_anterior().getFase_id()));
+                                }, 500);
+                            }
                         }
                     }
                     @SuppressLint("SetTextI18n")
                     @Override
                     public void onSwipeLeft() {
                         if (copiaFase.getProxima_fase() != null) {
-                            listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
-                            faseAtual.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
-                            listChaves.setVisibility(View.INVISIBLE);
-                            faseAtual.setVisibility(View.INVISIBLE);
-                            getSupportActionBar().setSubtitle("");
-                            new Handler().postDelayed(() -> {
-                                init(String.valueOf(copiaFase.getProxima_fase().getFase_id()));
-                            },500);
+                            if(copiaFase.getProxima_fase().getFase_id() != 0) {
+                                listChaves.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                faseAtual.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_out));
+                                listChaves.setVisibility(View.INVISIBLE);
+                                faseAtual.setVisibility(View.INVISIBLE);
+                                getSupportActionBar().setSubtitle("");
+                                new Handler().postDelayed(() -> {
+                                    progressBar.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_in));
+                                    progressBar.setVisibility(View.VISIBLE);
+                                    init(String.valueOf(copiaFase.getProxima_fase().getFase_id()));
+                                }, 500);
+                            }
                         }
                     }
                 });
@@ -190,6 +213,8 @@ public class FaseActivity extends AppCompatActivity {
     }
 
     public void call(String novoCampeonato, String novaFase) {
+        progressBar.startAnimation(AnimationUtils.loadAnimation(FaseActivity.this, android.R.anim.fade_in));
+        progressBar.setVisibility(View.VISIBLE);
         Call<Fase> callFase = api.getFase(novoCampeonato, novaFase);
         callFase.enqueue(new Callback<Fase>() {
             @SuppressLint("ClickableViewAccessibility")
@@ -225,6 +250,11 @@ public class FaseActivity extends AppCompatActivity {
                     init(novaFase);
                 } else {
                     showMessage("Não foi possível obter a fase, retorne mais tarde");
+                    if(fase == novaFase){
+                        finish();
+                    }else {
+                        init(fase);
+                    }
                 }
             }
 
