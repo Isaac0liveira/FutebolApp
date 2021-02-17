@@ -105,24 +105,27 @@ public class RodadaActivity extends AppCompatActivity {
                     listRodadas.setVisibility(View.VISIBLE);
                     rodadaAtual.setVisibility(View.VISIBLE);
                     getSupportActionBar().setSubtitle("Rodada " + rodadaID);
+                    rodadaAtual.setText("Rodada " + rodadaID);
                 }, 500);
                 listRodadas.setOnTouchListener(new OnSwipeTouchListener(RodadaActivity.this) {
                     @SuppressLint("SetTextI18n")
                     @Override
                     public void onSwipeRight() {
                         if (copiaRodada.getRodada_anterior() != null) {
-                            listRodadas.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_out));
-                            rodadaAtual.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_out));
-                            listRodadas.setVisibility(View.INVISIBLE);
-                            rodadaAtual.setVisibility(View.INVISIBLE);
-                            getSupportActionBar().setSubtitle("");
-                            new Handler().postDelayed(() -> {
-                                partidas.clear();
-                                progressBar.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_in));
-                                progressBar.setVisibility(View.VISIBLE);
-                                init(String.valueOf(copiaRodada.getRodada_anterior().getRodada()));
-                                rodadaAtual.setText("Rodada " + copiaRodada.getRodada_anterior().getRodada());
-                            }, 500);
+                            if(copiaRodada.getRodada_anterior().getRodada() != 0) {
+                                listRodadas.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_out));
+                                rodadaAtual.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_out));
+                                listRodadas.setVisibility(View.INVISIBLE);
+                                rodadaAtual.setVisibility(View.INVISIBLE);
+                                getSupportActionBar().setSubtitle("");
+                                new Handler().postDelayed(() -> {
+                                    partidas.clear();
+                                    progressBar.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_in));
+                                    progressBar.setVisibility(View.VISIBLE);
+                                    init(String.valueOf(copiaRodada.getRodada_anterior().getRodada()));
+                                    rodadaAtual.setText("Rodada " + copiaRodada.getRodada_anterior().getRodada());
+                                }, 500);
+                            }
                         }
                     }
 
@@ -130,18 +133,20 @@ public class RodadaActivity extends AppCompatActivity {
                     @Override
                     public void onSwipeLeft() {
                         if (copiaRodada.getProxima_rodada() != null) {
-                            listRodadas.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_out));
-                            rodadaAtual.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_out));
-                            listRodadas.setVisibility(View.INVISIBLE);
-                            rodadaAtual.setVisibility(View.INVISIBLE);
-                            getSupportActionBar().setSubtitle("");
-                            new Handler().postDelayed(() -> {
-                                partidas.clear();
-                                progressBar.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_in));
-                                progressBar.setVisibility(View.VISIBLE);
-                                init(String.valueOf(copiaRodada.getProxima_rodada().getRodada()));
-                                rodadaAtual.setText("Rodada " + copiaRodada.getProxima_rodada().getRodada());
-                            }, 500);
+                            if(copiaRodada.getProxima_rodada().getRodada() != 0) {
+                                listRodadas.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_out));
+                                rodadaAtual.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_out));
+                                listRodadas.setVisibility(View.INVISIBLE);
+                                rodadaAtual.setVisibility(View.INVISIBLE);
+                                getSupportActionBar().setSubtitle("");
+                                new Handler().postDelayed(() -> {
+                                    partidas.clear();
+                                    progressBar.startAnimation(AnimationUtils.loadAnimation(RodadaActivity.this, android.R.anim.fade_in));
+                                    progressBar.setVisibility(View.VISIBLE);
+                                    init(String.valueOf(copiaRodada.getProxima_rodada().getRodada()));
+                                    rodadaAtual.setText("Rodada " + copiaRodada.getProxima_rodada().getRodada());
+                                }, 500);
+                            }
                         }
                     }
                 });
@@ -156,8 +161,6 @@ public class RodadaActivity extends AppCompatActivity {
     }
 
     public void call(String novoCampeonato, String novaRodada){
-        getSupportActionBar().setSubtitle("Rodada " + novaRodada);
-        rodadaAtual.setText("Rodada " + novaRodada);
         Call<Rodada> callRodada = api.getRodada(novoCampeonato, novaRodada);
         callRodada.enqueue(new Callback<Rodada>() {
             @Override
